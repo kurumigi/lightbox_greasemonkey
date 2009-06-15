@@ -35,30 +35,49 @@
 	var SITEINFO = [
 		/* sample
 		{
-			url:          '',
+			url:           '',
+			link:          '',
+			excludeLink:   '',
+			thumbnailUrl:  '',
+			imageUrl:      '',
+		},
+		*/
+		// Hatena::Fotolife
+		// link:         http://f.hatena.ne.jp/kurumigi/20090603164158
+		// thumbnailUrl: http://f.hatena.ne.jp/images/fotolife/k/kurumigi/20090603/20090603164158.png
+		// imageUrl:     http://img.f.hatena.ne.jp/images/fotolife/k/kurumigi/20090603/20090603164158.png (same file)
+		{
+			url:           /^http:\/\/[dh]\.hatena\.(?:ne\.jp|com)/i,
+			link:          /^http:\/\/f\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d{14}$/i,
+			thumbnailUrl:  /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i,
+			imageUrl:      '$1',
+		},
+		// normal links to images
+		{
+			url:           /:\/\//i,
+			link:          /.*?\.(jpe?g|gif|png|bmp)$/i,
+		},
+	]
+
+	// gLightboxImageLinks
+	var gLightboxImageLinks = [
+		/* sample
+		{
 			link:         '',
-			excludeLink:  '',
-			thumbnailUrl: '',
 			imageUrl:     '',
-			exampleUrl:   '',
+			title:        '',
 		},
 		*/
 	]
-
 
 	// ====================
 	// Main routine
 	// ====================
 
-	init();
-	addImage();
+	insertHTML();
+	checkNodes();
 
 	// for AutoPagerize
-	var addFilterHandler = function() {
-		if (window.AutoPagerize.addFilter) {
-			window.AutoPagerize.addFilter(addImage);
-		}
-	}
 	if (window.AutoPagerize) {
 		addFilterHandler();
 	} else {
@@ -69,7 +88,7 @@
 	// Functions
 	// ====================
 
-	// init()
+	// insertHTML()
 	// Function runs on HTML load, inserting html at the top of the page that looks like this:
 	//
 	//	<img id="gLightboxPreload" />
@@ -86,7 +105,7 @@
 	//			<div id="gLightboxCaption"></div>
 	//		</div>
 	//	</div>
-	function init() {
+	function insertHTML() {
 		var objHead = document.getElementsByTagName('head').item(0);
 		var objBody = document.getElementsByTagName('body').item(0);
 		
@@ -158,111 +177,182 @@
 		gLightboxDetails.appendChild(gLightboxCaption);
 	}
 
-	// addImage(nodes)
+	// addFilterHandler() 
+	function addFilterHandler() {
+		if (window.AutoPagerize.addFilter) {
+			window.AutoPagerize.addFilter(checkNodes);
+		}
+	}
+
+	// checkNodes(nodes)
+	function checkNodes(nodes) {
+		var nodes = nodes || document;
+		
+		if (nodes.length) {
+			nodes.forEach(addImage);
+		} else {
+			addImage(nodes);
+		}
+	}
+
+	// addImage(node)
 	// Going through link tags looking for links to images.
 	// These links receive onclick events that enable the lightbox display for their targets.
-	// The function also inserts html markup at the top of the page which will be used as a
-	// container for the overlay pattern and the inline image.
-	function addImage(nodes) {
-		var links = getElementsByXPath("//a[@href]", document);
+	function addImage(node) {
+		var lastElement, imageUrl;
+		
+		var links = getElementsByXPath(".//a[@href]", node);
 		
 		for (var i = 0; i < links.length; i++) {
-			if (links[i].href.match(/.*?\.(jpe?g|gif|png|bmp)$/i)) {
-				links[i].addEventListener('click', showLightbox, false);
+			for (var j = 0; j < SITEINFO.length; j++) {
+				if (links[i].href.match(SITEINFO[j]['link']) && !(SITEINFO[j]['excludeLink'] && links[i].href.match(SITEINFO[j]['excludeLink']))) {
+					lastElement = gLightboxImageLinks.length;
+					
+					imageUrl = getImageUrl(links[i], SITEINFO[j]);
+					
+					if (imageUrl) {
+						gLightboxImageLinks[lastElement] = {
+							link:         links[i].href,
+							imageUrl:     imageUrl,
+							title:        (links[i].title || links[i].href),
+						};
+						
+						// set eventListener
+						var setEvent = function(element) {
+							links[i].addEventListener('click', function(event) {
+								showLightbox(event, element);
+							}, false);
+						}
+						setEvent(lastElement);
+						
+						break;
+					}
+				}
 			}
 		}
 	}
 
-	// showLightbox(event)
-	// load images. Pleaces new image in lightbox then centers and displays.
-	function showLightbox(event) {
-		// cancel opening image
-		event.preventDefault();
-		
-		// prep objects
-		var gLightbox             = document.getElementById('gLightbox');
-		var gLightboxImage        = document.getElementById('gLightboxImage');
-		var gLightboxDetails      = document.getElementById('gLightboxDetails');
-		var gLightboxCaption      = document.getElementById('gLightboxCaption');
-		var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
-		var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
-		var gLightboxPreload      = document.getElementById('gLightboxPreload');
-		
-		// get page size
-		var arrayPageSize = getPageSize();
-		var arrayPageScroll = getPageScroll();
-		
-		// center loadingImage
-		gLightboxLoadingImage.style.top = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - gLightboxLoadingImage.naturalHeight) / 2) + 'px';
-		gLightboxLoadingImage.style.left = ((arrayPageSize[0] - 20 - gLightboxLoadingImage.naturalWidth) / 2) + 'px';
-		gLightboxLoadingImage.style.display = 'block';
-		
-		// set height of Overlay to take up whole page and show
-		gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
-		gLightboxOverlay.style.display = 'block';
-		
-		// set caption
-		gLightboxCaption.innerHTML = this.title || this.href;
-		
-		// Places new image in lightbox then centers.
-		gLightboxPreload.addEventListener('load', function () {
-			// load image
-			gLightboxImage.src = gLightboxPreload.src;
+	// getImageUrl(node, siteinfo)
+	function getImageUrl(node, siteinfo) {
+		if (siteinfo['imageUrl']) {
+			var images = getElementsByXPath(".//img[@src]", node);
 			
-			// After image is loaded, update the overlay height as the new image might have
-			// increased the overall page height.
-			arrayPageSize = getPageSize();
-			arrayPageScroll = getPageScroll();
-			gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
-			
-			// get image size
-			var imageHeight = gLightboxPreload.naturalHeight;
-			var imageWidth  = gLightboxPreload.naturalWidth;
-			var resizedHeight = imageHeight;
-			var resizedWidth  = imageWidth;
-			
-			// center lightbox and make sure that the top and left values are not negative
-			// and the image placed outside the viewport
-			var lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - imageHeight) / 2);
-			var lightboxLeft = (arrayPageSize[0] - 20 - imageWidth) / 2;
-			
-			// resize if image is larger than screen size
-			if (lightboxTop - arrayPageScroll[1] < 0 || lightboxLeft - arrayPageScroll[0] < 0) {
-				// arrayPageSize[3] == windowHeight, arrayPageSize[2] == windowWidth
-				if (imageHeight / arrayPageSize[3] > imageWidth / arrayPageSize[2]) {
-					// height is too big
-					resizedHeight = arrayPageSize[3] - 50;
-					resizedWidth = imageWidth * (resizedHeight / imageHeight);
-					
-					lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
-					lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
-				} else {
-					// width is too big
-					resizedWidth = arrayPageSize[0] - 20;
-					resizedHeight = imageHeight * (resizedWidth / imageWidth);
-					
-					lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
-					lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
-				}
+			// thumbnailUrl => imageUrl
+			for (var i = 0; i < images.length; i++) {
+				if (images[i].src.match(siteinfo['thumbnailUrl'])) {
+					return images[i].src.replace(siteinfo['thumbnailUrl'], siteinfo['imageUrl']);
+				} 
 			}
 			
-			// set css
-			gLightbox.style.top = lightboxTop + 'px';
-			gLightbox.style.left = lightboxLeft + 'px';
-			gLightboxImage.style.height = resizedHeight + 'px';
-			gLightboxImage.style.width = resizedWidth + 'px';
-			gLightboxCaption.style.width = resizedWidth + 'px';
+			// link => imageUrl
+			return node.href.replace(siteinfo['link'], siteinfo['imageUrl'])
+		} else {
+			return node.href;
+		}
+	}
+
+	// showLightbox(event, element)
+	// load images. Pleaces new image in lightbox then centers and displays.
+	function showLightbox(event, element) {
+		if (event.shiftKey && event.ctrlKey) {
+			// shift + ctrl + click => don't use lightbox and open the link in this window.
+			event.preventDefault();
+			location.href = gLightboxImageLinks[element]['link'];
+			return true;
+		} else if (event.shiftKey || event.ctrlKey) {
+			// shift + click, ctrl + click => don't use lightbox.
+			return true;
+		} else {
+			// cancel opening image
+			event.preventDefault();
 			
-			// view image
-			gLightboxImage.addEventListener('load', function () {
-				gLightbox.style.display = 'block';
-				gLightboxCaption.style.display = 'block';
-				gLightboxLoadingImage.style.display = 'none';
+			// prep objects
+			var gLightbox             = document.getElementById('gLightbox');
+			var gLightboxImage        = document.getElementById('gLightboxImage');
+			var gLightboxDetails      = document.getElementById('gLightboxDetails');
+			var gLightboxCaption      = document.getElementById('gLightboxCaption');
+			var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
+			var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
+			var gLightboxPreload      = document.getElementById('gLightboxPreload');
+			
+			// get page size
+			var arrayPageSize = getPageSize();
+			var arrayPageScroll = getPageScroll();
+			
+			// center loadingImage
+			gLightboxLoadingImage.style.top = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - gLightboxLoadingImage.naturalHeight) / 2) + 'px';
+			gLightboxLoadingImage.style.left = ((arrayPageSize[0] - 20 - gLightboxLoadingImage.naturalWidth) / 2) + 'px';
+			gLightboxLoadingImage.style.display = 'block';
+			
+			// set height of Overlay to take up whole page and show
+			gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
+			gLightboxOverlay.style.display = 'block';
+			
+			// set caption
+			gLightboxCaption.innerHTML = gLightboxImageLinks[element]['title'];
+			
+			// Places new image in lightbox then centers.
+			gLightboxPreload.addEventListener('load', function() {
+				// load image
+				gLightboxImage.src = gLightboxPreload.src;
+				
+				// After image is loaded, update the overlay height as the new image might have
+				// increased the overall page height.
+				arrayPageSize = getPageSize();
+				arrayPageScroll = getPageScroll();
+				gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
+				
+				// get image size
+				var imageHeight = gLightboxPreload.naturalHeight;
+				var imageWidth  = gLightboxPreload.naturalWidth;
+				var resizedHeight = imageHeight;
+				var resizedWidth  = imageWidth;
+				
+				// center lightbox and make sure that the top and left values are not negative
+				// and the image placed outside the viewport
+				var lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - imageHeight) / 2);
+				var lightboxLeft = (arrayPageSize[0] - 20 - imageWidth) / 2;
+				
+				// resize if image is larger than screen size
+				if (lightboxTop - arrayPageScroll[1] < 0 || lightboxLeft - arrayPageScroll[0] < 0) {
+					// arrayPageSize[3] == windowHeight, arrayPageSize[2] == windowWidth
+					if (imageHeight / arrayPageSize[3] > imageWidth / arrayPageSize[2]) {
+						// height is too big
+						resizedHeight = arrayPageSize[3] - 50;
+						resizedWidth = imageWidth * (resizedHeight / imageHeight);
+						
+						lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
+						lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
+					} else {
+						// width is too big
+						resizedWidth = arrayPageSize[0] - 20;
+						resizedHeight = imageHeight * (resizedWidth / imageWidth);
+						
+						lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
+						lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
+					}
+				}
+				
+				// set css
+				gLightbox.style.top = lightboxTop + 'px';
+				gLightbox.style.left = lightboxLeft + 'px';
+				gLightboxImage.style.height = resizedHeight + 'px';
+				gLightboxImage.style.width = resizedWidth + 'px';
+				gLightboxCaption.style.width = resizedWidth + 'px';
+				
+				// view image
+				gLightboxImage.addEventListener('load', function() {
+					gLightboxImage.title = gLightboxCaption.innerHTML;
+					
+					gLightbox.style.display = 'block';
+					gLightboxCaption.style.display = 'block';
+					gLightboxLoadingImage.style.display = 'none';
+				}, false);
 			}, false);
-		}, false);
-		
-		// preload image
-		gLightboxPreload.src = this.href;
+			
+			// preload image
+			gLightboxPreload.src = gLightboxImageLinks[element]['imageUrl'];
+		}
 	}
 
 	// hideLightbox(event)
@@ -323,10 +413,10 @@
 	function getPageScroll(){
 		var xScroll, yScroll;
 		
-		xScroll = window.pagexOffset;
+		xScroll = window.pageXOffset;
 		yScroll = window.pageYOffset;
 		
-		arrayPageScroll = new Array(xScroll, yScroll) 
+		arrayPageScroll = new Array(xScroll, yScroll)
 		return arrayPageScroll;
 	}
 
