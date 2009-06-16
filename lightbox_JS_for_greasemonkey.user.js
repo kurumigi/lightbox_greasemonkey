@@ -26,32 +26,60 @@
 	// Configuration
 	// ====================
 
+	// DEBUG FLAG
+	var DEBUG = true;
+
 	// images
-	var loadingImage = 'data:image/gif;base64,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';
-	var closeButton = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAXUlEQVQ4jWNgGAWDD7x79+4/uXhgDJw+ffp/BwcHrAY4ODj8nz59OmkGOjg4wDEhcaK9jK4ZlyUkhSGyIdgMIytS8Bk2sC6kahhSPZapng4HX9ajxFCcBpJrKDZzAP478L8U4gAcAAAAAElFTkSuQmCC';
-	var overlayImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAABlCAYAAABUfC3PAAAA+0lEQVR4nO3RsQkAQRDEsO2/qW/ty/ANKFBu8N3dx3PyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyvt+1Vm8m02YIkEAAAAASUVORK5CYII=';
+	var OVERLAYIMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAABlCAYAAABUfC3PAAAA+0lEQVR4nO3RsQkAQRDEsO2/qW/ty/ANKFBu8N3dx3PyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyvt+1Vm8m02YIkEAAAAASUVORK5CYII=';
+	var LOADINGiMAGE = 'data:image/gif;base64,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';
+	var CLOSEBUTTON  = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAXUlEQVQ4jWNgGAWDD7x79+4/uXhgDJw+ffp/BwcHrAY4ODj8nz59OmkGOjg4wDEhcaK9jK4ZlyUkhSGyIdgMIytS8Bk2sC6kahhSPZapng4HX9ajxFCcBpJrKDZzAP478L8U4gAcAAAAAElFTkSuQmCC';
 
 	// SITEINFO
 	var SITEINFO = [
 		/* sample
 		{
-			url:           '',
-			link:          '',
-			excludeLink:   '',
-			thumbnailUrl:  '',
-			imageUrl:      '',
+			url:           //i,
+			link:          //i,
+			excludeLink:   //i,
+			getImageUrl:   function(node) { return ... },
 		},
 		*/
+
+		// amazon
+		{
+			url:           /^http:\/\/www\.amazon\.(?:co(?:m|\.jp|\.uk)|fr|de|ca)\//i,
+			link:          /^http:\/\/www\.amazon\.(?:co(?:m|\.jp|\.uk)|fr|de|ca)\/gp\/product\/images\/(\w{10})\/.*ref=dp_(?:otherviews|image).*$/i,
+			getImageUrl:   function(node) { return getImageUrlFromLink(node, this.link, 'http://ec2.images-amazon.com/images/P/$1.01._SCLZZZZZZZ_.jpg') },
+		},
+
+		// toranoana 1
+		{
+			url:           /^http:\/\/www.toranoana.jp\/mailorder\/(?:article\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}|[a-z]{3}\/pagekit\/\d{4}\/\d{2}\/\d{2}\/\d{10}\/index)\.html$/i,
+			link:          /^javascript:popUpWindow/i,
+			getImageUrl:   function(node) { return (getImageUrlFromThumbnail(node, /(img(?:18)?\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}-\d)\.gif$/i, 'popup_$1p.jpg') || getImageUrlFromThumbnail(node, /(\w+-\d)\.jpg$/i, '$1p.jpg')) },
+		},
+
+		// pixiv
+		{
+			url:           /^http:\/\/www\.pixiv\.net\//i,
+			link:          /^http:\/\/www\.pixiv\.net\/member_illust\.php\?mode=(?:medium|big)&illust_id=/i,
+			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /(\d+)_[sm]\.(jpg|png|gif)/i, '$1.$2') },
+		},
+
+		// danbooru
+		{
+			url:           /^http:\/\/(?:dan|safe)booru\.donmai\.us/i,
+			link:          /^http:\/\/(?:dan|safe)booru\.donmai\.us\/post\/show\/\d+/i,
+			getImageUrl:   function(node) { var [imageUrl, imageTitle] = getImageUrlFromThumbnail(node, /^(http:\/\/(?:dan|safe)booru\.donmai\.us\/data\/)preview\/([\w]+)\.jpg/i, '$1$2'); return [[imageUrl + '.jpg', imageUrl + '.png', imageUrl + '.gif', imageUrl + '.bmp'], imageTitle]; },
+		},
+
 		// Hatena::Fotolife
-		// link:         http://f.hatena.ne.jp/kurumigi/20090603164158
-		// thumbnailUrl: http://f.hatena.ne.jp/images/fotolife/k/kurumigi/20090603/20090603164158.png
-		// imageUrl:     http://img.f.hatena.ne.jp/images/fotolife/k/kurumigi/20090603/20090603164158.png (same file)
 		{
 			url:           /^http:\/\/[dh]\.hatena\.(?:ne\.jp|com)/i,
 			link:          /^http:\/\/f\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d{14}$/i,
-			thumbnailUrl:  /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i,
-			imageUrl:      '$1',
+			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i) },
 		},
+
 		// normal links to images
 		{
 			url:           /:\/\//i,
@@ -59,24 +87,29 @@
 		},
 	]
 
-	// gLightboxImageLinks
-	var gLightboxImageLinks = [
-		/* sample
-		{
-			link:         '',
-			imageUrl:     '',
-			title:        '',
-		},
-		*/
-	]
+	// ====================
+	// Global variable
+	// ====================
 
+	// SITEINFO used by this page
+	var siteinfoToUse = []
+
+	// imageLinks
+	//  link:            links to the image file.
+	//  imageUrl:        url of image file.
+	//  title:           title of image file.
+	//  backgroundColor: background-color of image file.
+	var imageLinks = []
+	imageLinks.nowImage = 0;
+	
 	// ====================
 	// Main routine
 	// ====================
 
 	insertHTML();
+	checkSITEINFO();
 	checkNodes();
-
+	
 	// for AutoPagerize
 	if (window.AutoPagerize) {
 		addFilterHandler();
@@ -112,12 +145,12 @@
 		// insert CSS
 		var gLightboxCSS = document.createElement('style');
 		gLightboxCSS.type = 'text/css';
-		var gLightboxCSSText = '#gLightbox { position: absolute; z-index: 1000100; background-color: #000; padding: 10px; border: none; }' +
+		var gLightboxCSSText = '#gLightbox { position: absolute; z-index: 1000100; background-color: #000; padding: 10px; border: none; -moz-border-radius: 10px;}' +
 		                       '#gLightbox img { border: none; clear: both; }' +
 		                       '#gLightboxDetails { font-size: 0.8em; padding-top: 0.4em; }' +
 		                       '#gLightboxCaption { color: #DDD; text-align: center;}' +
 		                       '#gLightboxCloseButton { top: 5px; right: 5px; }' +
-		                       '#gLightboxOverlay { position: absolute; top: 0; left: 0; z-index: 1000090; width: 100%; background-image: url(' + overlayImage + '); }' +
+		                       '#gLightboxOverlay { position: absolute; top: 0; left: 0; z-index: 1000090; width: 100%; background-image: url(' + OVERLAYIMAGE + '); }' +
 		                       '#gLightboxOverlay img { border: none; } ' +
 		                       '#gLightboxLoadingImage { position: absolute; z-index: 1000100; }'
 		gLightboxCSS.appendChild(document.createTextNode(gLightboxCSSText));
@@ -144,7 +177,7 @@
 		
 		// create loading image
 		var gLightboxLoadingImage = document.createElement("img");
-		gLightboxLoadingImage.src = loadingImage;
+		gLightboxLoadingImage.src = LOADINGiMAGE;
 		gLightboxLoadingImage.id = 'gLightboxLoadingImage';
 		gLightboxLoadingImageLink.appendChild(gLightboxLoadingImage);
 		
@@ -177,6 +210,15 @@
 		gLightboxDetails.appendChild(gLightboxCaption);
 	}
 
+	// checkSITEINFO();
+	function checkSITEINFO() {
+		for (var i = 0; i < SITEINFO.length; i++) {
+			if (location.href.match(SITEINFO[i]['url'])) {
+				siteinfoToUse.push(SITEINFO[i]);
+			}
+		}
+	}
+
 	// addFilterHandler() 
 	function addFilterHandler() {
 		if (window.AutoPagerize.addFilter) {
@@ -199,29 +241,36 @@
 	// Going through link tags looking for links to images.
 	// These links receive onclick events that enable the lightbox display for their targets.
 	function addImage(node) {
-		var lastElement, imageUrl;
+		var lastElement, imageUrl, imageTitle;
 		
 		var links = getElementsByXPath(".//a[@href]", node);
 		
 		for (var i = 0; i < links.length; i++) {
-			for (var j = 0; j < SITEINFO.length; j++) {
-				if (links[i].href.match(SITEINFO[j]['link']) && !(SITEINFO[j]['excludeLink'] && links[i].href.match(SITEINFO[j]['excludeLink']))) {
-					lastElement = gLightboxImageLinks.length;
+			for (var j = 0; j < siteinfoToUse.length; j++) {
+				if (links[i].href.match(siteinfoToUse[j]['link']) && !(siteinfoToUse[j]['excludeLink'] && links[i].href.match(siteinfoToUse[j]['excludeLink']))) {
+					lastElement = imageLinks.length;
 					
-					imageUrl = getImageUrl(links[i], SITEINFO[j]);
+					if (siteinfoToUse[j]['getImageUrl']) {
+						[imageUrl, imageTitle] = siteinfoToUse[j]['getImageUrl'](links[i]);
+					} else {
+						[imageUrl, imageTitle] = [links[i].href, links[i].title || links[i].href];
+					}
 					
 					if (imageUrl) {
-						gLightboxImageLinks[lastElement] = {
-							link:         links[i].href,
-							imageUrl:     imageUrl,
-							title:        (links[i].title || links[i].href),
+						imageLinks[lastElement] = {
+							link:            links[i].href,
+							imageUrl:        imageUrl,
+							title:           imageTitle,
+							backgroundColor: searchBackgroundColor(links[i]),
 						};
+						
+						if (DEBUG) { GM_log(lastElement + "(" + i + ", " + j + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']);}
 						
 						// set eventListener
 						var setEvent = function(element) {
 							links[i].addEventListener('click', function(event) {
 								showLightbox(event, element);
-							}, false);
+							}, true);
 						}
 						setEvent(lastElement);
 						
@@ -230,25 +279,104 @@
 				}
 			}
 		}
+		
+		// set eventListener if exist images
+		if (imageLinks.length > 0) {
+			document.addEventListener('keyup', getKey, true);
+		}
 	}
 
-	// getImageUrl(node, siteinfo)
-	function getImageUrl(node, siteinfo) {
-		if (siteinfo['imageUrl']) {
-			var images = getElementsByXPath(".//img[@src]", node);
+	// getImageUrlFromThumbnail(node, thumbnailUrlRE, replace)
+	// template of getImageUrl
+	function getImageUrlFromThumbnail(node, thumbnailUrlRE, replace) {
+		var matchUrl, imageUrl, imageTitle;
+		
+		var images = getElementsByXPath(".//img[@src]", node);
+		
+		for (var i = 0; i < images.length; i++) {
+			matchUrl = images[i].src.match(thumbnailUrlRE);
 			
-			// thumbnailUrl => imageUrl
-			for (var i = 0; i < images.length; i++) {
-				if (images[i].src.match(siteinfo['thumbnailUrl'])) {
-					return images[i].src.replace(siteinfo['thumbnailUrl'], siteinfo['imageUrl']);
-				} 
+			if (matchUrl) {
+				if (replace) {
+					imageUrl = images[i].src.replace(thumbnailUrlRE, replace);
+				} else {
+					imageUrl = matchUrl[0];
+				}
+				
+				imageTitle = images[i].title || node.title || images[i].src;
+				
+				return [imageUrl, imageTitle];
 			}
-			
-			// link => imageUrl
-			return node.href.replace(siteinfo['link'], siteinfo['imageUrl'])
-		} else {
-			return node.href;
 		}
+	}
+
+	// getImageUrlFromLink(node, linkUrlRE, replace)
+	// template of getImageUrl
+	function getImageUrlFromLink(node, linkUrlRE, replace) {
+		var imageUrl, imageTitle;
+		
+		var matchUrl = node.href.match(linkUrlRE);
+		
+		if (matchUrl) {
+			if (replace) {
+				imageUrl = node.href.replace(linkUrlRE, replace);
+			} else {
+				imageUrl = matchUrl[0];
+			}
+		}
+		
+		imageTitle = node.title || node.href;
+		
+		return [imageUrl, imageTitle];
+	}
+
+	// getKey(event)
+	// Gets keycode. If 'x' is pressed then it hides the lightbox.
+	function getKey(event) {
+		switch (event.keyCode) {
+			case 27: // Esc
+			case 88: // 'x'
+				hideLightbox();
+				break;
+			case 37: // Left(<-)
+				loadAnotherImage(-1);
+				break;
+			case 39: // Right(->)
+				loadAnotherImage(1);
+				break;
+			case 38: // Up
+				loadAnotherImage(-imageLinks.nowImage);
+				break;
+			case 40: // Down
+				loadAnotherImage(-(imageLinks.nowImage + 1));
+				break;
+		}
+	}
+
+	// loadAnotherImage(step)
+	// load another image
+	function loadAnotherImage(step) {
+		var loadImage = (imageLinks.nowImage + step) % imageLinks.length;
+		
+		if (loadImage < 0) {
+			loadImage = loadImage + imageLinks.length;
+		}
+		hideLightbox("");
+		showLightbox("", loadImage);
+	}
+
+	// hideLightbox(event)
+	function hideLightbox(event) {
+		// cancel opening image
+		stopEvents(event);
+		
+		// prep objects
+		var gLightbox = document.getElementById('gLightbox');
+		var gLightboxOverlay = document.getElementById('gLightboxOverlay');
+		
+		// hide lightbox and overlay
+		gLightbox.style.display = 'none';
+		gLightboxOverlay.style.display = 'none';
 	}
 
 	// showLightbox(event, element)
@@ -256,15 +384,15 @@
 	function showLightbox(event, element) {
 		if (event.shiftKey && event.ctrlKey) {
 			// shift + ctrl + click => don't use lightbox and open the link in this window.
-			event.preventDefault();
-			location.href = gLightboxImageLinks[element]['link'];
+			stopEvents(event);
+			location.href = imageLinks[element]['link'];
 			return true;
 		} else if (event.shiftKey || event.ctrlKey) {
 			// shift + click, ctrl + click => don't use lightbox.
 			return true;
 		} else {
 			// cancel opening image
-			event.preventDefault();
+			stopEvents(event);
 			
 			// prep objects
 			var gLightbox             = document.getElementById('gLightbox');
@@ -288,10 +416,7 @@
 			gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
 			gLightboxOverlay.style.display = 'block';
 			
-			// set caption
-			gLightboxCaption.innerHTML = gLightboxImageLinks[element]['title'];
-			
-			// Places new image in lightbox then centers.
+			// after preloading image, places new image in lightbox then centers.
 			gLightboxPreload.addEventListener('load', function() {
 				// load image
 				gLightboxImage.src = gLightboxPreload.src;
@@ -334,15 +459,16 @@
 				}
 				
 				// set css
-				gLightbox.style.top = lightboxTop + 'px';
+				gLightbox.style.top  = lightboxTop + 'px';
 				gLightbox.style.left = lightboxLeft + 'px';
 				gLightboxImage.style.height = resizedHeight + 'px';
-				gLightboxImage.style.width = resizedWidth + 'px';
+				gLightboxImage.style.width  = resizedWidth + 'px';
 				gLightboxCaption.style.width = resizedWidth + 'px';
 				
-				// view image
+				// after loading image, view image
 				gLightboxImage.addEventListener('load', function() {
 					gLightboxImage.title = gLightboxCaption.innerHTML;
+					gLightboxImage.style.backgroundColor = imageLinks[element]['backgroundColor'];
 					
 					gLightbox.style.display = 'block';
 					gLightboxCaption.style.display = 'block';
@@ -350,23 +476,16 @@
 				}, false);
 			}, false);
 			
-			// preload image
-			gLightboxPreload.src = gLightboxImageLinks[element]['imageUrl'];
+			// if image file is not found, print error message.
+			gLightboxPreload.addEventListener('error', hideLightbox, false);
+			
+			// preload image and set caption
+			gLightboxPreload.src = selectImageUrl(imageLinks[element]['imageUrl']);
+			gLightboxCaption.innerHTML = imageLinks[element]['title'];
+			imageLinks.nowImage = element;
+			
+			if (DEBUG) { GM_log("opening : " + gLightboxPreload.src);}
 		}
-	}
-
-	// hideLightbox(event)
-	function hideLightbox(event) {
-		// cancel opening image
-		event.preventDefault();
-		
-		// prep objects
-		var gLightbox = document.getElementById('gLightbox');
-		var gLightboxOverlay = document.getElementById('gLightboxOverlay');
-		
-		// hide lightbox and overlay
-		gLightbox.style.display = 'none';
-		gLightboxOverlay.style.display = 'none';
 	}
 
 	// getPageSize()
@@ -403,26 +522,54 @@
 			pageWidth = bodyWidth;
 		}
 		
-		arrayPageSize = new Array(pageWidth, pageHeight, windowWidth, windowHeight);
-		return arrayPageSize;
+		return [pageWidth, pageHeight, windowWidth, windowHeight];
 	}
 
 	// getPageScroll()
 	// Returns array with x,y page scroll values.
 	// Original core code from - quirksmode.org
 	function getPageScroll(){
-		var xScroll, yScroll;
-		
-		xScroll = window.pageXOffset;
-		yScroll = window.pageYOffset;
-		
-		arrayPageScroll = new Array(xScroll, yScroll)
-		return arrayPageScroll;
+		return [window.pageXOffset, window.pageYOffset];
+	}
+
+	// selectImageUrl(urls)
+	// select existing url from urls
+	function selectImageUrl(urls) {
+		if (urls.constructor == Array) {
+			for (var i = 0; i < urls.length; i++) {
+				if (fileFound(urls[i])) {
+					return urls[i];
+				}
+			}
+		} else {
+			return urls;
+		}
 	}
 
 	// ====================
 	// Utility functions
 	// ====================
+
+	// stopEvents(event)
+	// stop default events
+	function stopEvents(event) {
+		if (event) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+	}
+
+	// searchBackgroundColor(node)
+	function searchBackgroundColor(node) {
+		var backgroundColor = getComputedStyle(node, '').backgroundColor;
+		
+		// #document don't have style.	
+		if ((backgroundColor == '' || backgroundColor == 'transparent') && node.parentNode && node.parentNode.parentNode) {
+			backgroundColor = searchBackgroundColor(node.parentNode) ;
+		}
+		
+		return backgroundColor;
+	}
 
 	// getElementsByXPath(xpath, node)
 	// from http://www.ohmiyapatriots.com/blog/2007/07/04/greasemonkey%E3%81%AE%E9%96%8B%E7%99%BA%E3%82%92%E3%81%BE%E3%81%A8%E3%82%81%E3%81%A6%E3%81%BF%E3%82%8B/
@@ -433,7 +580,7 @@
 		for (var i = 0; i < nodesSnapshot.snapshotLength; i++) {
 			data.push(nodesSnapshot.snapshotItem(i));
 		}
-		return (data.length >= 1) ? data : null;
+		return data;
 	}
 
 	// getFirstElementByXPath(xpath, node)
@@ -441,7 +588,19 @@
 	function getFirstElementByXPath(xpath, node) {
 		var node = node || document;
 		var result = document.evaluate(xpath, node, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-		return result.singleNodeValue ? result.singleNodeValue : null;
+		return result.singleNodeValue;
+	}
+
+	// check file exists
+	function fileFound(url) {
+		var req = new XMLHttpRequest(); // XMLHttpRequest object
+		try {
+			req.open("HEAD", url, false);
+			req.send(null);  
+			return (req.status == 200) ? true : false;
+		} catch(er) {
+			return false;
+		}
 	}
 
 })()
