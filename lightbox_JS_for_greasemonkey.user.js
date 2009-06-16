@@ -45,6 +45,20 @@
 		},
 		*/
 
+		// google image search
+		{
+			url:           /^http:\/\/images\.(?:google\.[a-z.]+)\/images/i,
+			link:          /^http:\/\/images\.(?:google\.[a-z.]+)\/imgres\?.*?imgurl=(.*?)(?:&.*)?$/i,
+			getImageUrl:   function(node) { return getImageUrlFromLink(node, this.link, '$1') },
+		},
+
+		// wikipedia
+		{
+			url:           /^https?:\/\/(.*?\.)?wikipedia\.org/i,
+			link:          /:.*?\.(jpe?g|gif|png)$/i,
+			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /(.+?)\/thumb\/(.+?)\.(jpe?g|gif|png).*$/i, '$1/$2.$3') },
+		},
+
 		// amazon
 		{
 			url:           /^http:\/\/www\.amazon\.(?:co(?:m|\.jp|\.uk)|fr|de|ca)\//i,
@@ -52,7 +66,7 @@
 			getImageUrl:   function(node) { return getImageUrlFromLink(node, this.link, 'http://ec2.images-amazon.com/images/P/$1.01._SCLZZZZZZZ_.jpg') },
 		},
 
-		// toranoana 1
+		// toranoana
 		{
 			url:           /^http:\/\/www.toranoana.jp\/mailorder\/(?:article\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}|[a-z]{3}\/pagekit\/\d{4}\/\d{2}\/\d{2}\/\d{10}\/index)\.html$/i,
 			link:          /^javascript:popUpWindow/i,
@@ -241,7 +255,7 @@
 	// Going through link tags looking for links to images.
 	// These links receive onclick events that enable the lightbox display for their targets.
 	function addImage(node) {
-		var lastElement, imageUrl, imageTitle;
+		var lastElement, imageUrl, setEvent;
 		
 		var links = getElementsByXPath(".//a[@href]", node);
 		
@@ -250,31 +264,39 @@
 				if (links[i].href.match(siteinfoToUse[j]['link']) && !(siteinfoToUse[j]['excludeLink'] && links[i].href.match(siteinfoToUse[j]['excludeLink']))) {
 					lastElement = imageLinks.length;
 					
-					if (siteinfoToUse[j]['getImageUrl']) {
-						[imageUrl, imageTitle] = siteinfoToUse[j]['getImageUrl'](links[i]);
-					} else {
-						[imageUrl, imageTitle] = [links[i].href, links[i].title || links[i].href];
+					// declare eventListener
+					setEvent = function(element) {
+						links[i].addEventListener('click', function(event) {
+							showLightbox(event, element);
+						}, true);
 					}
 					
-					if (imageUrl) {
-						imageLinks[lastElement] = {
-							link:            links[i].href,
-							imageUrl:        imageUrl,
-							title:           imageTitle,
-							backgroundColor: searchBackgroundColor(links[i]),
-						};
-						
-						if (DEBUG) { GM_log(lastElement + "(" + i + ", " + j + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']);}
-						
-						// set eventListener
-						var setEvent = function(element) {
-							links[i].addEventListener('click', function(event) {
-								showLightbox(event, element);
-							}, true);
+					if (lastElement > 0 && (links[i].href == imageLinks[lastElement - 1]['link'])) {
+						// if duplicate images, reuse before event
+						setEvent(lastElement - 1);
+					} else {
+						// detect image url and title
+						if (siteinfoToUse[j]['getImageUrl']) {
+							imageUrl = siteinfoToUse[j]['getImageUrl'](links[i]);
+						} else {
+							imageUrl = [links[i].href, links[i].title || links[i].href];
 						}
-						setEvent(lastElement);
 						
-						break;
+						if (imageUrl) {
+							imageLinks[lastElement] = {
+								link:            links[i].href,
+								imageUrl:        imageUrl[0],
+								title:           imageUrl[1],
+								backgroundColor: searchBackgroundColor(links[i]),
+							};
+							
+							if (DEBUG) { GM_log(lastElement + "(" + i + ", " + j + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']); }
+							
+							// set eventListener
+							setEvent(lastElement);
+							
+							break;
+						}
 					}
 				}
 			}
@@ -298,12 +320,12 @@
 			
 			if (matchUrl) {
 				if (replace) {
-					imageUrl = images[i].src.replace(thumbnailUrlRE, replace);
+					imageUrl = decodeURIComponent(images[i].src.replace(thumbnailUrlRE, replace));
 				} else {
-					imageUrl = matchUrl[0];
+					imageUrl = decodeURIComponent(matchUrl[0]);
 				}
 				
-				imageTitle = images[i].title || node.title || images[i].src;
+				imageTitle = images[i].title || node.title || imageUrl;
 				
 				return [imageUrl, imageTitle];
 			}
@@ -319,13 +341,13 @@
 		
 		if (matchUrl) {
 			if (replace) {
-				imageUrl = node.href.replace(linkUrlRE, replace);
+				imageUrl = decodeURIComponent(node.href.replace(linkUrlRE, replace));
 			} else {
-				imageUrl = matchUrl[0];
+				imageUrl = decodeURIComponent(matchUrl[0]);
 			}
 		}
 		
-		imageTitle = node.title || node.href;
+		imageTitle = node.title || imageUrl;
 		
 		return [imageUrl, imageTitle];
 	}
