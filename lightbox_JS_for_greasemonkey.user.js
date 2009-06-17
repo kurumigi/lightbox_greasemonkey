@@ -3,6 +3,7 @@
 // @namespace      http://d.hatena.ne.jp/kurumigi/
 // @description    Lightbox JS for greasemonkey
 // @include        *
+// @exclude        http://image-search.yahoo.co.jp/search?*
 // ==/UserScript==
 
 // ================================= original copyright  =================================
@@ -41,6 +42,9 @@
 			url:           //i,
 			link:          //i,
 			excludeLink:   //i,
+			function:      '',
+			re:            //i,
+			replace:       '',
 			getImageUrl:   function(node) { return ... },
 		},
 		*/
@@ -49,55 +53,148 @@
 		{
 			url:           /^http:\/\/images\.(?:google\.[a-z.]+)\/images/i,
 			link:          /^http:\/\/images\.(?:google\.[a-z.]+)\/imgres\?.*?imgurl=(.*?)(?:&.*)?$/i,
-			getImageUrl:   function(node) { return getImageUrlFromLink(node, this.link, '$1') },
+			function:      'link',
+			replace:       '$1',
 		},
 
 		// wikipedia
 		{
 			url:           /^https?:\/\/(.*?\.)?wikipedia\.org/i,
 			link:          /:.*?\.(jpe?g|gif|png)$/i,
-			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /(.+?)\/thumb\/(.+?)\.(jpe?g|gif|png).*$/i, '$1/$2.$3') },
+			function:      'thumbnail',
+			re:            /(.+?)\/thumb\/(.+?)\.(jpe?g|gif|png).*$/i,
+			replace:       '$1/$2.$3',
+		},
+
+		// ITmedia
+		{
+			url:           /^http:\/\/(?:www\.itmedia\.co|bizmakoto)\.jp\//i,
+			link:          /^(http:\/\/image\.itmedia\.co\.jp)\/l\/im\/(\w+\/articles\/\d{4}\/\d{2}\/l_[\w-]+\.(?:jpg|png))/i,
+			function:      'link',
+			replace:       '$1/$2',
+		},
+
+		// Impress Watch (type1)
+		{
+			url:           /^http:\/\/[a-z]+\.watch\.impress\.co\.jp\//i,
+			link:          /(img\/[a-z]+\/docs\/\d{3}\/\d{3})\/html\/([\w-]+\.(?:jpg|png))\.html/i,
+			function:      'link',
+			replace:       '$1/$2',
+		},
+		
+		// Impress Watch (type2)
+		{
+			url:           /^http:\/\/k-tai\.impress\.co\.jp\//i,
+			link:          /cda\/parts\/image_for_link\/[\d-]+\.html/i,
+			function:      'thumbnail',
+			re:            /(cda\/static\/image\/\d{4}\/\d{2}\/\d{2}\/[\w-]+?)_s\.(jpg|png)$/i,
+			replace:       '$1l.$2',
+		},
+		
+		// Impress Watch (type3)
+		{
+			url:           /^http:\/\/k-tai\.impress\.co\.jp\//i,
+			link:          /cda\/parts\/image_for_link\/[\d-]+\.html/i,
+			function:      'thumbnail',
+			re:            /(cda\/static\/image\/\d{4}\/\d{2}\/\d{2}\/[\w-]+?)s\.(jpg|png)$/i,
+			replace:       '$1.$2',
+		},
+		
+		// Impress Watch (type4)
+		{
+			url:           /^http:\/\/www\.watch\.impress\.co\.jp\/akiba\//i,
+			link:          /((?:image)?\d{8}\/[\w-]+)\.html/i,
+			function:      'link',
+			replace:       '$1.jpg',
+		},
+		
+		// Impress Watch (type5)
+		{
+			url:           /^http:\/\/www\.forest\.impress\.co\.jp\//i,
+			link:          /(article\/\d{4}\/\d{2}\/\d{2}\/\w+_\d+r)\.html/i,
+			function:      'link',
+			replace:       '$1.jpg',
 		},
 
 		// amazon
 		{
 			url:           /^http:\/\/www\.amazon\.(?:co(?:m|\.jp|\.uk)|fr|de|ca)\//i,
 			link:          /^http:\/\/www\.amazon\.(?:co(?:m|\.jp|\.uk)|fr|de|ca)\/gp\/product\/images\/(\w{10})\/.*ref=dp_(?:otherviews|image).*$/i,
-			getImageUrl:   function(node) { return getImageUrlFromLink(node, this.link, 'http://ec2.images-amazon.com/images/P/$1.01._SCLZZZZZZZ_.jpg') },
+			function:      'link',
+			replace:       'http://ec2.images-amazon.com/images/P/$1.01._SCLZZZZZZZ_.jpg',
 		},
 
-		// toranoana
+		// toranoana (type1)
 		{
-			url:           /^http:\/\/www.toranoana.jp\/mailorder\/(?:article\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}|[a-z]{3}\/pagekit\/\d{4}\/\d{2}\/\d{2}\/\d{10}\/index)\.html$/i,
+			url:           /^http:\/\/www.toranoana.jp\/mailorder\/article\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}\.html$/i,
 			link:          /^javascript:popUpWindow/i,
-			getImageUrl:   function(node) { return (getImageUrlFromThumbnail(node, /(img(?:18)?\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}-\d)\.gif$/i, 'popup_$1p.jpg') || getImageUrlFromThumbnail(node, /(\w+-\d)\.jpg$/i, '$1p.jpg')) },
+			function:      'thumbnail',
+			re:            /(img(?:18)?\/\d{2}\/\d{4}\/\d{2}\/\d{2}\/\d{12}-\d)\.gif$/i,
+			replace:       'popup_$1p.jpg',
 		},
 
-		// pixiv
+		// toranoana (type2)
 		{
-			url:           /^http:\/\/www\.pixiv\.net\//i,
-			link:          /^http:\/\/www\.pixiv\.net\/member_illust\.php\?mode=(?:medium|big)&illust_id=/i,
-			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /(\d+)_[sm]\.(jpg|png|gif)/i, '$1.$2') },
+			url:           /^http:\/\/www.toranoana.jp\/mailorder\/[a-z]{3}\/pagekit\/\d{4}\/\d{2}\/\d{2}\/\d{10}\/index\.html$/i,
+			link:          /^javascript:popUpWindow/i,
+			function:      'thumbnail',
+			re:            /(\w+-\d)\.jpg$/i,
+			replace:       '$1p.jpg',
 		},
 
 		// danbooru
 		{
 			url:           /^http:\/\/(?:dan|safe)booru\.donmai\.us/i,
 			link:          /^http:\/\/(?:dan|safe)booru\.donmai\.us\/post\/show\/\d+/i,
-			getImageUrl:   function(node) { var [imageUrl, imageTitle] = getImageUrlFromThumbnail(node, /^(http:\/\/(?:dan|safe)booru\.donmai\.us\/data\/)preview\/([\w]+)\.jpg/i, '$1$2'); return [[imageUrl + '.jpg', imageUrl + '.png', imageUrl + '.gif', imageUrl + '.bmp'], imageTitle]; },
+			getImageUrl:   function(node) {
+				var imageUrl = getImageUrl['thumbnail'](node, /^(http:\/\/(?:dan|safe)booru\.donmai\.us\/data\/)preview\/([\w]+)\.jpg/i, '$1$2');
+				if (imageUrl) {
+					imageUrl['url'] = [imageUrl['url'] + '.jpg', imageUrl['url'] + '.png', imageUrl['url'] + '.gif', imageUrl['url'] + '.bmp'];
+					return imageUrl;
+				}
+			},
 		},
 
-		// Hatena::Fotolife
+		// pixiv
+		{
+			url:           /^http:\/\/www\.pixiv\.net\//i,
+			link:          /^http:\/\/www\.pixiv\.net\/member_illust\.php\?mode=(?:medium|big)&illust_id=/i,
+			function:      'thumbnail',
+			re:            /(\d+)_[sm]\.(jpg|png|gif)/i,
+			replace:       '$1.$2',
+		},
+
+		// deviantart
+		{
+			url:           /^https?:\/\/(?:.*?\.)?deviantart\.(?:com|net)/i,
+			link:          /^https?:\/\/.*?\.deviantart\.(?:com|net)\/(?:deviation|print|art)\/.+/i,
+			function:      'thumbnail',
+			re:            /^http(s)?:\/\/th(\d+)\.deviantart\.(?:com|net)\/([^\/]*)\/[^\/]*\/(.*?)\.(jpe?g|gif|png)$/i,
+			replace:       'http$1://fc$2.deviantart.com/$3/$4.$5',
+		},
+
+		// Hatena
 		{
 			url:           /^http:\/\/[dh]\.hatena\.(?:ne\.jp|com)/i,
 			link:          /^http:\/\/f\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d{14}$/i,
-			getImageUrl:   function(node) { return getImageUrlFromThumbnail(node, /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i) },
+			function:      'thumbnail',
+			re:            /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i,
+		},
+
+		// flickr
+		{
+			url:           /^https?:\/\/(.*?\.)?flickr\.com/i,
+			link:          /\/photos\/[^\/]+\/[0-9]+/i,
+			function:      'thumbnail',
+			re:            /_[tsm]\.jpg/i,
+			replace:       '.jpg',
 		},
 
 		// normal links to images
 		{
 			url:           /:\/\//i,
 			link:          /.*?\.(jpe?g|gif|png|bmp)$/i,
+			function:      'link',
 		},
 	]
 
@@ -114,23 +211,8 @@
 	//  title:           title of image file.
 	//  backgroundColor: background-color of image file.
 	var imageLinks = []
-	imageLinks.nowImage = 0;
+	imageLinks.nowViewing = 0;
 	
-	// ====================
-	// Main routine
-	// ====================
-
-	insertHTML();
-	checkSITEINFO();
-	checkNodes();
-	
-	// for AutoPagerize
-	if (window.AutoPagerize) {
-		addFilterHandler();
-	} else {
-		window.addEventListener('GM_AutoPagerizeLoaded', addFilterHandler, false);
-	}
-
 	// ====================
 	// Functions
 	// ====================
@@ -147,10 +229,9 @@
 	//	<div id="gLightbox">
 	//		<a href="#" onclick="hideLightbox(); return false;" title="Click anywhere to close image">
 	//			<img id="gLightboxImage" />
+	//			<span id="gLightboxError" />
 	//		</a>
-	//		<div id="gLightboxDetails">
-	//			<div id="gLightboxCaption"></div>
-	//		</div>
+	//		<div id="gLightboxCaption"></div>
 	//	</div>
 	function insertHTML() {
 		var objHead = document.getElementsByTagName('head').item(0);
@@ -160,9 +241,9 @@
 		var gLightboxCSS = document.createElement('style');
 		gLightboxCSS.type = 'text/css';
 		var gLightboxCSSText = '#gLightbox { position: absolute; z-index: 1000100; background-color: #000; padding: 10px; border: none; -moz-border-radius: 10px;}' +
-		                       '#gLightbox img { border: none; clear: both; }' +
-		                       '#gLightboxDetails { font-size: 0.8em; padding-top: 0.4em; }' +
-		                       '#gLightboxCaption { color: #DDD; text-align: center;}' +
+		                       '#gLightboxImage { border: none; clear: both; }' +
+		                       '#gLightboxError { color: #FFF; text-align: center; font-size: 10em; }' +
+		                       '#gLightboxCaption { color: #DDD; text-align: center; font-size: 0.8em; padding-top: 0.4em; }' +
 		                       '#gLightboxCloseButton { top: 5px; right: 5px; }' +
 		                       '#gLightboxOverlay { position: absolute; top: 0; left: 0; z-index: 1000090; width: 100%; background-image: url(' + OVERLAYIMAGE + '); }' +
 		                       '#gLightboxOverlay img { border: none; } ' +
@@ -212,16 +293,17 @@
 		gLightboxImage.id = 'gLightboxImage';
 		gLightboxLink.appendChild(gLightboxImage);
 		
-		// create details div, a container for the caption and keyboard message
-		var gLightboxDetails = document.createElement("div");
-		gLightboxDetails.id = 'gLightboxDetails';
-		gLightbox.appendChild(gLightboxDetails);
+		// create error message
+		var gLightboxError = document.createElement("span");
+		gLightboxError.style.display = 'none';
+		gLightboxError.id = 'gLightboxError';
+		gLightboxLink.appendChild(gLightboxError);
 		
 		// create caption
 		var gLightboxCaption = document.createElement("div");
 		gLightboxCaption.id = 'gLightboxCaption';
 		gLightboxCaption.style.display = 'none';
-		gLightboxDetails.appendChild(gLightboxCaption);
+		gLightbox.appendChild(gLightboxCaption);
 	}
 
 	// checkSITEINFO();
@@ -279,14 +361,14 @@
 						if (siteinfoToUse[j]['getImageUrl']) {
 							imageUrl = siteinfoToUse[j]['getImageUrl'](links[i]);
 						} else {
-							imageUrl = [links[i].href, links[i].title || links[i].href];
+							imageUrl = getImageUrl[siteinfoToUse[j]['function']](links[i], siteinfoToUse[j]['re'] || siteinfoToUse[j]['link'], siteinfoToUse[j]['replace']);
 						}
 						
 						if (imageUrl) {
 							imageLinks[lastElement] = {
 								link:            links[i].href,
-								imageUrl:        imageUrl[0],
-								title:           imageUrl[1],
+								imageUrl:        imageUrl['url'],
+								title:           imageUrl['title'],
 								backgroundColor: searchBackgroundColor(links[i]),
 							};
 							
@@ -308,48 +390,52 @@
 		}
 	}
 
-	// getImageUrlFromThumbnail(node, thumbnailUrlRE, replace)
-	// template of getImageUrl
-	function getImageUrlFromThumbnail(node, thumbnailUrlRE, replace) {
-		var matchUrl, imageUrl, imageTitle;
-		
-		var images = getElementsByXPath(".//img[@src]", node);
-		
-		for (var i = 0; i < images.length; i++) {
-			matchUrl = images[i].src.match(thumbnailUrlRE);
+	var getImageUrl = {
+		// get image url from link
+		link:      function(node, re, replace) {
+			if (DEBUG) {GM_log("getImageUrl.link(node, " + re + ", " + replace + ")") };
+			
+			var imageUrl;
+			
+			var matchUrl = node.href.match(re);
 			
 			if (matchUrl) {
 				if (replace) {
-					imageUrl = decodeURIComponent(images[i].src.replace(thumbnailUrlRE, replace));
+					imageUrl = decodeURIComponent(node.href.replace(re, replace));
 				} else {
-					imageUrl = decodeURIComponent(matchUrl[0]);
+					imageUrl = decodeURIComponent(node.href);
 				}
-				
-				imageTitle = images[i].title || node.title || imageUrl;
-				
-				return [imageUrl, imageTitle];
 			}
-		}
-	}
-
-	// getImageUrlFromLink(node, linkUrlRE, replace)
-	// template of getImageUrl
-	function getImageUrlFromLink(node, linkUrlRE, replace) {
-		var imageUrl, imageTitle;
+			
+			var imageTitle = node.title || imageUrl;
+			
+			return {url: imageUrl, title: imageTitle};
+		},
 		
-		var matchUrl = node.href.match(linkUrlRE);
-		
-		if (matchUrl) {
-			if (replace) {
-				imageUrl = decodeURIComponent(node.href.replace(linkUrlRE, replace));
-			} else {
-				imageUrl = decodeURIComponent(matchUrl[0]);
+		// get image url from thumbnail image
+		thumbnail: function(node, re, replace) {
+			if (DEBUG) {GM_log("getImageUrl.thumbnail(node, " + re + ", " + replace + ")") };
+			
+			var matchUrl, imageUrl, imageTitle;
+			
+			var images = getElementsByXPath(".//img[@src]", node);
+			
+			for (var i = 0; i < images.length; i++) {
+				matchUrl = images[i].src.match(re);
+				
+				if (matchUrl) {
+					if (replace) {
+						imageUrl = decodeURIComponent(images[i].src.replace(re, replace));
+					} else {
+						imageUrl = decodeURIComponent(images[i].src);
+					}
+					
+					imageTitle = images[i].title || node.title || imageUrl;
+					
+					return {url: imageUrl, title: imageTitle};
+				}
 			}
-		}
-		
-		imageTitle = node.title || imageUrl;
-		
-		return [imageUrl, imageTitle];
+		},
 	}
 
 	// getKey(event)
@@ -358,27 +444,30 @@
 		switch (event.keyCode) {
 			case 27: // Esc
 			case 88: // 'x'
-				hideLightbox();
+				hideLightbox(event);
 				break;
 			case 37: // Left(<-)
-				loadAnotherImage(-1);
+				loadAnotherImage(-1, event);
 				break;
 			case 39: // Right(->)
-				loadAnotherImage(1);
+				loadAnotherImage(1, event);
 				break;
 			case 38: // Up
-				loadAnotherImage(-imageLinks.nowImage);
+				loadAnotherImage(-imageLinks.nowViewing, event);
 				break;
 			case 40: // Down
-				loadAnotherImage(-(imageLinks.nowImage + 1));
+				loadAnotherImage(-(imageLinks.nowViewing + 1), event);
 				break;
 		}
 	}
 
-	// loadAnotherImage(step)
+	// loadAnotherImage(step, event)
 	// load another image
-	function loadAnotherImage(step) {
-		var loadImage = (imageLinks.nowImage + step) % imageLinks.length;
+	function loadAnotherImage(step, event) {
+		// cancel default events
+		stopEvents(event);
+		
+		var loadImage = (imageLinks.nowViewing + step) % imageLinks.length;
 		
 		if (loadImage < 0) {
 			loadImage = loadImage + imageLinks.length;
@@ -393,8 +482,18 @@
 		stopEvents(event);
 		
 		// prep objects
-		var gLightbox = document.getElementById('gLightbox');
-		var gLightboxOverlay = document.getElementById('gLightboxOverlay');
+		var gLightbox             = document.getElementById('gLightbox');
+		var gLightboxImage        = document.getElementById('gLightboxImage');
+		var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
+		var gLightboxPreload      = document.getElementById('gLightboxPreload');
+		
+		// remove event listener
+		gLightboxImage.removeEventListener('load', loaded, false);
+		gLightboxPreload.removeEventListener('load', preloaded, false);
+		gLightboxPreload.removeEventListener('error', errorMessage, false);
+		
+		// remove image
+		gLightboxImage.src = '';
 		
 		// hide lightbox and overlay
 		gLightbox.style.display = 'none';
@@ -419,153 +518,140 @@
 			// prep objects
 			var gLightbox             = document.getElementById('gLightbox');
 			var gLightboxImage        = document.getElementById('gLightboxImage');
-			var gLightboxDetails      = document.getElementById('gLightboxDetails');
 			var gLightboxCaption      = document.getElementById('gLightboxCaption');
 			var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
 			var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
 			var gLightboxPreload      = document.getElementById('gLightboxPreload');
 			
-			// get page size
-			var arrayPageSize = getPageSize();
-			var arrayPageScroll = getPageScroll();
+			// get page size and viewport
+			var sizeAndPosition = getSizeAndPosition();
+			
+			// calculate display position
+			var calculateDisplayPosition = function(imageWidth, imageHeight) {
+				return {
+					x: ((sizeAndPosition['page']['x'] - 20 - imageWidth) / 2),
+					y: sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 35 - imageHeight) / 2),
+				}
+			};
+			var displayPosition = calculateDisplayPosition(gLightboxLoadingImage.naturalWidth, gLightboxLoadingImage.naturalHeight);
 			
 			// center loadingImage
-			gLightboxLoadingImage.style.top = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - gLightboxLoadingImage.naturalHeight) / 2) + 'px';
-			gLightboxLoadingImage.style.left = ((arrayPageSize[0] - 20 - gLightboxLoadingImage.naturalWidth) / 2) + 'px';
+			gLightboxLoadingImage.style.top = displayPosition['y'] + 'px';
+			gLightboxLoadingImage.style.left = displayPosition['x'] + 'px';
 			gLightboxLoadingImage.style.display = 'block';
 			
 			// set height of Overlay to take up whole page and show
-			gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
+			gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
 			gLightboxOverlay.style.display = 'block';
 			
 			// after preloading image, places new image in lightbox then centers.
-			gLightboxPreload.addEventListener('load', function() {
+			preloaded = function() {
 				// load image
 				gLightboxImage.src = gLightboxPreload.src;
 				
 				// After image is loaded, update the overlay height as the new image might have
 				// increased the overall page height.
-				arrayPageSize = getPageSize();
-				arrayPageScroll = getPageScroll();
-				gLightboxOverlay.style.height = arrayPageSize[1] + 'px';
+				sizeAndPosition = getSizeAndPosition();
+				gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
 				
 				// get image size
-				var imageHeight = gLightboxPreload.naturalHeight;
-				var imageWidth  = gLightboxPreload.naturalWidth;
-				var resizedHeight = imageHeight;
-				var resizedWidth  = imageWidth;
+				var imageSize = {
+					x: gLightboxPreload.naturalWidth,
+					y: gLightboxPreload.naturalHeight,
+				};
+				// copy values of a object
+				var displaySize = {
+					x: imageSize['x'],
+					y: imageSize['y'],
+				};
 				
 				// center lightbox and make sure that the top and left values are not negative
 				// and the image placed outside the viewport
-				var lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - imageHeight) / 2);
-				var lightboxLeft = (arrayPageSize[0] - 20 - imageWidth) / 2;
+				displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
 				
 				// resize if image is larger than screen size
-				if (lightboxTop - arrayPageScroll[1] < 0 || lightboxLeft - arrayPageScroll[0] < 0) {
-					// arrayPageSize[3] == windowHeight, arrayPageSize[2] == windowWidth
-					if (imageHeight / arrayPageSize[3] > imageWidth / arrayPageSize[2]) {
+				if (displayPosition['y'] - sizeAndPosition['position']['y'] < 0 || displayPosition['x'] - sizeAndPosition['position']['x'] < 0) {
+					// which too bigs?
+					if (imageSize['y'] / sizeAndPosition['window']['y'] > imageSize['x'] / sizeAndPosition['window']['x']) {
 						// height is too big
-						resizedHeight = arrayPageSize[3] - 50;
-						resizedWidth = imageWidth * (resizedHeight / imageHeight);
+						displaySize['y'] = sizeAndPosition['window']['y'] - 50;
+						displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
 						
-						lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
-						lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
+						displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
 					} else {
 						// width is too big
-						resizedWidth = arrayPageSize[0] - 20;
-						resizedHeight = imageHeight * (resizedWidth / imageWidth);
+						displaySize['x'] = sizeAndPosition['page']['x'] - 20;
+						displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
 						
-						lightboxTop = arrayPageScroll[1] + ((arrayPageSize[3] - 35 - resizedHeight) / 2);
-						lightboxLeft = (arrayPageSize[0] - 20 - resizedWidth) / 2;
+						displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
 					}
 				}
 				
+				if (DEBUG) { GM_log("loading: " + gLightboxPreload.src + " (" + gLightboxPreload.naturalHeight + "x" + gLightboxPreload.naturalWidth + ", " + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
+				
 				// set css
-				gLightbox.style.top  = lightboxTop + 'px';
-				gLightbox.style.left = lightboxLeft + 'px';
-				gLightboxImage.style.height = resizedHeight + 'px';
-				gLightboxImage.style.width  = resizedWidth + 'px';
-				gLightboxCaption.style.width = resizedWidth + 'px';
+				gLightbox.style.left = displayPosition['x'] + 'px';
+				gLightbox.style.top  = displayPosition['y'] + 'px';
+				gLightboxImage.style.width  = displaySize['x'] + 'px';
+				gLightboxImage.style.height = displaySize['y'] + 'px';
+				gLightboxCaption.style.width = displaySize['x'] + 'px';
 				
 				// after loading image, view image
-				gLightboxImage.addEventListener('load', function() {
+				loaded = function() {
 					gLightboxImage.title = gLightboxCaption.innerHTML;
 					gLightboxImage.style.backgroundColor = imageLinks[element]['backgroundColor'];
 					
 					gLightbox.style.display = 'block';
 					gLightboxCaption.style.display = 'block';
 					gLightboxLoadingImage.style.display = 'none';
-				}, false);
-			}, false);
+					
+					// remove event listener
+					gLightboxImage.removeEventListener('load', loaded, false);
+				}
+				// set event listener
+				gLightboxImage.addEventListener('load', loaded , false);
+				
+				// remove event listener
+				gLightboxPreload.removeEventListener('load', preloaded, false);
+				gLightboxPreload.removeEventListener('error', errorMessage, false);
+			}
+				// set event listener
+			gLightboxPreload.addEventListener('load', preloaded, false);
+			gLightboxPreload.addEventListener('error', errorMessage, false);
 			
-			// if image file is not found, print error message.
-			gLightboxPreload.addEventListener('error', hideLightbox, false);
+			// select existing url from urls
+			var selectImageUrl = function(urls) {
+				if (urls.constructor == Array) {
+					for (var i = 0; i < urls.length; i++) {
+						if (fileFound(urls[i])) {
+							return urls[i];
+						}
+					}
+				} else {
+					return urls;
+				}
+			};
 			
 			// preload image and set caption
 			gLightboxPreload.src = selectImageUrl(imageLinks[element]['imageUrl']);
 			gLightboxCaption.innerHTML = imageLinks[element]['title'];
-			imageLinks.nowImage = element;
-			
-			if (DEBUG) { GM_log("opening : " + gLightboxPreload.src);}
+			imageLinks.nowViewing = element;
 		}
+		
 	}
 
-	// getPageSize()
-	// Returns array with page width, height and window width, height
-	// Original core code from - quirksmode.org
-	// Edit for Firefox by pHaez
-	function getPageSize(){
-		var bodyWidth, bodyHeight, windowWidth, windowHeight;;
+	// errorMessage(event)
+	function errorMessage(event) {
+		var gLightbox             = document.getElementById('gLightbox');
+		var gLightboxError        = document.getElementById('gLightboxError');
+		var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
 		
-		// detect rendering modes
-		if (document.compatMode == "CSS1Compat") {
-			windowWidth = document.documentElement.clientWidth;
-			windowHeight = document.documentElement.clientHeight;
-			bodyWidth = document.documentElement.scrollWidth;
-			bodyHeight = document.documentElement.scrollHeight;
-		} else {
-			windowWidth = document.body.clientWidth;
-			windowHeight = document.body.clientHeight;
-			bodyWidth = document.body.scrollWidth;
-			bodyHeight = document.body.scrollHeight;
-		}	
+		gLightboxError.innerHTML = 'file not found!';
+		gLightboxError.style.display = 'inline';
+		gLightbox.style.display = 'block';
+		gLightboxLoadingImage.style.display = 'none';
 		
-		// for small pages with total height less then height of the viewport
-		if (bodyHeight < windowHeight) {
-			pageHeight = windowHeight;
-		} else { 
-			pageHeight = bodyHeight;
-		}
-		
-		// for small pages with total width less then width of the viewport
-		if (bodyWidth < windowWidth) {
-			pageWidth = windowWidth;
-		} else {
-			pageWidth = bodyWidth;
-		}
-		
-		return [pageWidth, pageHeight, windowWidth, windowHeight];
-	}
-
-	// getPageScroll()
-	// Returns array with x,y page scroll values.
-	// Original core code from - quirksmode.org
-	function getPageScroll(){
-		return [window.pageXOffset, window.pageYOffset];
-	}
-
-	// selectImageUrl(urls)
-	// select existing url from urls
-	function selectImageUrl(urls) {
-		if (urls.constructor == Array) {
-			for (var i = 0; i < urls.length; i++) {
-				if (fileFound(urls[i])) {
-					return urls[i];
-				}
-			}
-		} else {
-			return urls;
-		}
+		this.removeEventListener('error', errorMessage, false);
 	}
 
 	// ====================
@@ -579,6 +665,48 @@
 			event.stopPropagation();
 			event.preventDefault();
 		}
+	}
+
+	// getSizeAndPosition()
+	// Returns array with page width, height and window width, height and x,y page scroll values.
+	// Original core code from - quirksmode.org (Edit for Firefox by pHaez)
+	function getSizeAndPosition() {
+		var documentElement;
+		
+		// detect rendering modes
+		if (document.compatMode == "CSS1Compat") {
+			documentElement = document.documentElement;
+		} else {
+			documentElement = document.body;
+		}
+		
+		// get page size and viewport
+		var sizeAndPosition = {
+			window:   {
+				x : documentElement.clientWidth,
+				y : documentElement.clientHeight,
+			},
+			page:     {
+				x : documentElement.scrollWidth,
+				y : documentElement.scrollHeight,
+			} ,
+			position: {
+				x : window.pageXOffset,
+				y : window.pageYOffset,
+			}
+		}
+		
+		// for small pages with total height less then height of the viewport
+		if (sizeAndPosition['page']['x'] < sizeAndPosition['window']['x']) {
+			sizeAndPosition['page']['x'] = sizeAndPosition['window']['x'];
+		}
+		
+		// for small pages with total width less then width of the viewport
+		if (sizeAndPosition['page']['y'] < sizeAndPosition['window']['y']) {
+			sizeAndPosition['page']['y'] = sizeAndPosition['window']['y'];
+		}
+		
+		return sizeAndPosition;
 	}
 
 	// searchBackgroundColor(node)
@@ -623,6 +751,21 @@
 		} catch(er) {
 			return false;
 		}
+	}
+
+	// ====================
+	// Main routine
+	// ====================
+
+	insertHTML();
+	checkSITEINFO();
+	checkNodes();
+	
+	// for AutoPagerize
+	if (window.AutoPagerize) {
+		addFilterHandler();
+	} else {
+		window.addEventListener('GM_AutoPagerizeLoaded', addFilterHandler, false);
 	}
 
 })()
