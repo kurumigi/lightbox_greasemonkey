@@ -442,8 +442,11 @@
 	// Gets keycode. If 'x' is pressed then it hides the lightbox.
 	function getKey(event) {
 		switch (event.keyCode) {
-			case 27: // Esc
+			case 79: // 'o'
+				openImage(event, event.shiftKey);
+				break;
 			case 88: // 'x'
+			case 27: // Esc
 				hideLightbox(event);
 				break;
 			case 37: // Left(<-)
@@ -460,6 +463,17 @@
 				break;
 		}
 	}
+
+	// openImage(event, newWindow, element)
+	function openImage(event, newWindow, element) {
+		stopEvents(event);
+		
+		if (newWindow) {
+			GM_openInTab(imageLinks[element || imageLinks.nowViewing]['link']);
+		} else {
+			location.href = imageLinks[element || imageLinks.nowViewing]['link'];
+		}
+}
 
 	// loadAnotherImage(step, event)
 	// load another image
@@ -505,8 +519,7 @@
 	function showLightbox(event, element) {
 		if (event.shiftKey && event.ctrlKey) {
 			// shift + ctrl + click => don't use lightbox and open the link in this window.
-			stopEvents(event);
-			location.href = imageLinks[element]['link'];
+			openImage(event, false, element);
 			return true;
 		} else if (event.shiftKey || event.ctrlKey) {
 			// shift + click, ctrl + click => don't use lightbox.
