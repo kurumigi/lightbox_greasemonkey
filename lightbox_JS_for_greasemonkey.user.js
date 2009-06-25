@@ -31,7 +31,7 @@
 
 	// images
 	var OVERLAYIMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAABlCAYAAABUfC3PAAAA+0lEQVR4nO3RsQkAQRDEsO2/qW/ty/ANKFBu8N3dx3PyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyoQ8AFMm5AGYMiEPwJQJeQCmTMgDMGVCHoApE/IATJmQB2DKhDwAUybkAZgyIQ/AlAl5AKZMyAMwZUIegCkT8gBMmZAHYMqEPABTJuQBmDIhD8CUCXkApkzIAzBlQh6AKRPyAEyZkAdgyvt+1Vm8m02YIkEAAAAASUVORK5CYII=';
-	var LOADINGiMAGE = 'data:image/gif;base64,R0lGODlhfgAWANUiAFJSUi4uLjAwMElJSVBQUE9PT0xMTEhISCwsLDU1NUFBQUtLSy8vL0VFRUZGRlNTU2pqZy8vLDs7N1paWj09PVNTTkJCPjExMTIyMjY2Njg4ODQ0NDk5OW5ubjo6OkBAQC0tLTMzM////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFAAAiACwAAAAAfgAWAAAG/8CQcEgsGo/IpHLJbDqfx450Sq1ar9isdsvter/Th7DzKZvP6LR6zW673/C43Dz+gBB4kH7P7/v/gIGCg4SFhn94CCBkdQgUDQ0OB5MKegqTmAeVIBhGGHqdRZ+cnqClpKKmqahEo6GtqrCsGBcXDAiMIWQIkJIDvwMBAcDEwQEbyMnIwsrKzM3Lx9Abz9DVzdfO0tbb2N0htBe4H42RBwML6QYCAgbu7+7sGfP08/L19Pf4Gfr4/fX/8gnYZ28gwYAFMyRYuAGcuFxkQPhaYKCAxVoWM2aspaGjx44cP3oMKVIDSZEnP6YceaEkyJYuV770qLDhJ4h2JlEsQKAnBv8MPYMG/cmhqNGiRI8aTaqUA1OlT49GXYqhKdKqVqdeNapBoZBF5HTlRMezJwAhANKqTSvEg9u3btvCfSt3roe6c/HC1Us3hN24fv/yBeyBa4KGYOuAOLegLNsQa9cOvhvY7uTLlfNm3ru571/Kn+UW1XA4RGKxi8maPQs58uPQnQkLjg16NuzbtnOPLp04AgQJqRsHZe36dW7LtDHjRr5c823DiH9HQK2z4lCgQq9bdYq1qVbu27+L7w6VvFTzVLl6NY1TIuOKFy9o1CjTJMyS9fPfR7lfZX+WLtkXIEk1gXPaLuagow478MCDED8G7fPghBH6UyFAFwpEEIQbyrN0UGm0jFNOgsAIU0yJ3WgzDTUpJpONiy1Gs+KLMk5DI4vKOPRQWLs8Yg4llmQCJCtDuHLKK0XGkiSRQhi5CpJNKhklkwbOUsst7SVyyJZcdunll4jkgRMYZJZp5ploahHWA3O06eabcMb5BhR01mnnnXhCEQQAIfkEBQAAIgAsBAAEABwADgAABnhAxuWCCRkxoqRymVQcnlDFsLipbphY0WDL3RJDm4Q4k2UazugzNZHRuMvLgnwuN7I1nDxcSej7+2AJeHkee0kAiImIgYMehYaKioyEj3uRiZOEhiKXiyF3eRybf39rbW+GdHRfYWObaWlTYFabXV1CX0ebTlBPCkEAIfkEBQAAIgAsDgAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsGAAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsIgAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsLAAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsNgAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsQAAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsSgAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsVAAEABwADgAABmlATGhIxIiOyORRcWg6FZuoNKqsigbYLDbD7XKtSoN4LNaYz2ZwssBusznwOFyNJNjvdo9+r6cfAYCBgHx8fiKCgoR7hoiBin1+jYBycoZ4eGhohm5uXl6GZGRTU4ZaWkJEQ0Z+TE5NCkEAIfkEBQAAIgAsXgAEABwADgAABnxATGhIxIiOyORRcWg6Gg3KZkqdKq+igXZweDYy4DAYqzQsztynZs1ek5OFuDnNqdvrbyRhXzA3PYCBgHlHAHsEBQtcgoKEIgCGiIoHjIGOkHyTlYOEkZJcd3eOh30LTW1tjnGlaWJijmZoXQ1VVY5baVBCRENGhExOUBRBACH5BAUAACIALAQABAB6AA4AAAavQEqj4TgYFaKkcslsOp/QqHRKFWFC2Cxm+jgMi4PwoEoum8/TjXqtnk684IXcgK7b79GMfq93H+IGBYJ4hIV1GoiJiH5GC4EEkIaSk1IclpeWjAMLBZAEAJShokkepaalmpyQAKCjroanp6mdn62vt3axprOetri/ZbqoUhUWjY+RwMpVmJh+gIIFy9NSiop+RAebc9TdTnx82NliY97mSWxsfkLZR+fnV1lYW1JdQQA7';
+	var LOADINGIMAGE = 'data:image/gif;base64,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';
 	var CLOSEBUTTON  = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAXUlEQVQ4jWNgGAWDD7x79+4/uXhgDJw+ffp/BwcHrAY4ODj8nz59OmkGOjg4wDEhcaK9jK4ZlyUkhSGyIdgMIytS8Bk2sC6kahhSPZapng4HX9ajxFCcBpJrKDZzAP478L8U4gAcAAAAAElFTkSuQmCC';
 
 	// SITEINFO
@@ -56,14 +56,23 @@
 			link:         /^http:\/\/images\.(?:google\.[a-z.]+)\/imgres\?.*?imgurl=(.*?)(?:&.*)?$/i,
 			replace:      '$1',
 		},
-
+		
 		// wikipedia
 		{
-			url:          /^https?:\/\/(.*?\.)?wikipedia\.org/i,
+			url:          /^https?:\/\/(?:.*?\.)?wikipedia\.org/i,
 			function:     'page',
-			link:         /:.*?\.(?:jpe?g|gif|png)$/i,
-			thumbnail:    /\/thumb(\/.+?)\.(jpe?g|gif|png).*$/i,
-			replace:      '$1.$2',
+			link:         /^https?:.*?:.*?\.(?:jpe?g|gif|png)$/i,
+			thumbnail:    /^(http:\/\/upload\.wikimedia\.org\/.*?\/)thumb\/(.+?)\.(jpe?g|gif|png).*$/i,
+			replace:      '$1$2.$3',
+		},
+
+		// uncyclopedia japan
+		{
+			url:          /^https?:\/\/(?:(?:.*?\.)?(?:uncyclopedia\.info|uncyc\.org)|ansaikuropedia\.org)\//i,
+			function:     'page',
+			link:         /^https?:.*?:.*?\.(?:jpe?g|gif|png)$/i,
+			thumbnail:    /^(http:\/\/images\.uncyc\.org\/.*?\/)(?:thumb\/)?(.+?)\.(jpe?g|gif|png).*$/i,
+			replace:      '$1$2.$3',
 		},
 
 		// ITmedia
@@ -204,10 +213,10 @@
 
 		// mixi
 		{
-			url:           /^http:\/\/mixi.jp\/view_(?:diary|bbs)\.pl/i,
-			function:      '',
-			link:          /^javascript\:void\(0\);$/,
-			getImageUrl:   function(node) {
+			url:          /^http:\/\/mixi.jp\/view_(?:diary|bbs)\.pl/i,
+			function:     '',
+			link:         /^javascript\:void\(0\);$/,
+			getImageUrl:  function(node) {
 				var searchText, htmlUrl, html, imageUrl = {};
 				
 				searchText = /<img SRC="(http:\/\/ic\.mixi\.jp\/p\/\w+\/\w+\/(?:diary|bbs_comm)\/\d+_\d+\.jpg)" BORDER=0>/i;
@@ -225,29 +234,37 @@
 			},
 		},
 
-		// Hatena
+		// Hatena (type1)
 		{
-			url:           /^http:\/\/[dh]\.hatena\.(?:ne\.jp|com)/i,
-			function:      'page',
-			link:          /^http:\/\/f\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d{14}$/i,
-			thumbnail:     /^(http:\/\/f\.hatena\.ne\.jp\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))$/i,
+			url:          /^http:\/\/[dh]\.hatena\.(?:ne\.jp|com)/i,
+			function:     'page',
+			link:         /^http:\/\/f\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d{14}$/i,
+			thumbnail:    /^http:\/\/(?:img\.)?f\.hatena\.ne\.jp(\/images\/fotolife\/[a-zA-Z]\/[a-zA-Z][\w-]{2,}\/\d{8}\/\d{14}\.(?:jpe?g|gif|png))(?:\?\d+)?$/i,
+		},
+		
+		// Hatena (type2)
+		{
+			url:          /^http:\/\/h\.hatena\.(?:ne\.jp|com)\/(?:keyword\/.+\?mode=)?album/i,
+			function:     'page',
+			link:         /^http:\/\/h\.hatena\.ne\.jp\/[a-zA-Z][\w-]{2,}\/\d+$/i,
+			thumbnail:    /^(.+\.(?:jpe?g|gif|png))$/i,
 		},
 
 		// flickr
 		{
-			url:           /^https?:\/\/(.*?\.)?flickr\.com/i,
-			function:      'page',
-			link:          /\/photos\/[^\/]+\/[0-9]+/i,
-			thumbnail:     /_[tsm]\.jpg/i,
-			replace:       '.jpg',
+			url:          /^https?:\/\/(.*?\.)?flickr\.com/i,
+			function:     'page',
+			link:         /\/photos\/[^\/]+\/[0-9]+/i,
+			thumbnail:    /_[tsm]\.jpg/i,
+			replace:      '.jpg',
 		},
 
 		// normal links to images
 		{
-			url:           /:\/\//i,
-			function:      'page',
-			link:          /.*?\.(jpe?g|gif|png|bmp)$/i,
-			excludeLink:   /\?\w+=https?:\/\//i,
+			url:          /:\/\//i,
+			function:     'page',
+			link:         /.*?\.(jpe?g|gif|png|bmp)$/i,
+			excludeLink:  /:\/\/.*?\/.*:/i,
 		},
 	]
 
@@ -332,18 +349,9 @@
 		
 		// get page size and viewport
 		var sizeAndPosition = {
-			window:   {
-				x : documentElement.clientWidth,
-				y : documentElement.clientHeight,
-			},
-			page:     {
-				x : documentElement.scrollWidth,
-				y : documentElement.scrollHeight,
-			} ,
-			position: {
-				x : window.pageXOffset,
-				y : window.pageYOffset,
-			}
+			window:   { x : documentElement.clientWidth, y : documentElement.clientHeight },
+			page:     { x : documentElement.scrollWidth, y : documentElement.scrollHeight },
+			position: { x : window.pageXOffset,          y : window.pageYOffset           }
 		}
 		
 		// for small pages with total height less then height of the viewport
@@ -365,7 +373,7 @@
 		var checkNode = node;
 		
 		do {
-			backgroundColor = getComputedStyle(node, '').backgroundColor;
+			backgroundColor = getComputedStyle(checkNode, '').backgroundColor;
 			
 			checkNode = checkNode.parentNode;
 		} while ((backgroundColor == '' || backgroundColor == 'transparent') && !(checkNode.nodeName == '#document'))
@@ -400,29 +408,63 @@
 		// insert CSS
 		var gLightboxCSS = document.createElement('style');
 		gLightboxCSS.type = 'text/css';
-		var gLightboxCSSText = '#gLightbox { position: absolute; z-index: 1000150; background-color: #000; padding: 10px; border: none; -moz-border-radius: 10px;}' +
-		                       '#gLightboxImage { border: none; clear: both; }' +
-		                       '#gLightboxError { width: 600px; height: 50px; color: #FFF; background-color: #000; text-align: center; font-size: 3em; padding: 0; margin: 0; border: none; }' +
-		                       '#gLightboxCaption { color: #DDD; background-color: #000; text-align: center; font-size: 0.8em; padding-top: 0.4em; }' +
-		                       '#gLightboxCaption a { color: #FFF; }' +
-		                       '#gLightboxOverlay { position: absolute; top: 0; left: 0; z-index: 1000090; width: 100%; background-color: transparent; background-image: url(' + OVERLAYIMAGE + '); }' +
-		                       '#gLightboxOverlay img { border: none; } ' +
-		                       '#gLightboxLoadingImage { position: absolute; z-index: 1000100; }'
+		var gLightboxCSSText = [
+			'#gLightbox',
+				' { position: absolute; z-index: 1000150; background-color: #000; padding: 10px; border: none; -moz-border-radius: 10px;} ',
+			'#gLightbox.gL_hidden',
+				' { display: none; } ',
+			'#gLightbox.gL_shown',
+				' { display: block; } ',
+			'#gLightbox a, #gLightbox img, ',
+			'#gLightbox a:hover,  #gLightbox img:hover, ',
+			'#gLightbox a:focus,  #gLightbox img:focus, ',
+			'#gLightbox a:link,   #gLightbox img:link, ',
+			'#gLightbox a:active, #gLightbox img:active',
+				' { border: none; clear: both; } ',
+			'#gLightbix div',
+				' { background-color: #000; } ',
+			'#gLightboxImage.gL_hidden',
+				' { display: none; } ',
+			'#gLightboxImage.gL_shown',
+				' { display: inline; } ',
+			'#gLightboxError',
+				' { width: 600px; height: 50px; color: #FFF; text-align: center; font-size: 3em; padding: 0; margin: 0; } ',
+			'#gLightboxError.gL_hidden',
+				' { display: none; } ',
+			'#gLightboxError.gL_shown',
+				' { display: block; } ',
+			'#gLightboxCaption',
+				' { color: #DDD; text-align: center; font-size: 0.8em; padding-top: 0.4em; } ',
+			'#gLightboxCaption.gL_hidden',
+				' { display: none; } ',
+			'#gLightboxCaption.gL_shown',
+				' { display: block; } ',
+			'#gLightboxCaption a',
+				' { color: #FFF; } ',
+			'#gLightboxOverlay',
+				' { position: absolute; top: 0; left: 0; z-index: 1000090; width: 100%; background-color: transparent; background-image: url(' + OVERLAYIMAGE + '); } ',
+			'#gLightboxOverlay.gL_hidden',
+				' { display: none; } ',
+			'#gLightboxOverlay.gL_shown',
+				' { display: block; } ',
+			'#gLightboxLoadingImage',
+				' { position: absolute; z-index: 1000100; } ',
+			'#gLightboxLoadingImage.gL_hidden',
+				' { display: none; } ',
+			'#gLightboxLoadingImage.gL_shown',
+				' { display: block; } ',
+			'#gLightboxPreload',
+				' { display: none; } ',
+		].join("");
 		gLightboxCSS.appendChild(document.createTextNode(gLightboxCSSText));
-		objHead.insertBefore(gLightboxCSS, objHead.firstChild);
+		objHead.appendChild(gLightboxCSS);
 		
 		// create overlay div
 		var gLightboxOverlay = document.createElement('div');
 		gLightboxOverlay.id = 'gLightboxOverlay';
-		gLightboxOverlay.style.display = 'none';
+		gLightboxOverlay.className = 'gL_hidden';
 		gLightboxOverlay.addEventListener('click', hideLightbox, false);
-		objBody.insertBefore(gLightboxOverlay, objBody.firstChild);
-		
-		// create preloader
-		var gLightboxPreload = document.createElement("img");
-		gLightboxPreload.id = 'gLightboxPreload';
-		gLightboxPreload.style.display = 'none';
-		objBody.insertBefore(gLightboxPreload, objBody.firstChild);
+		objBody.appendChild(gLightboxOverlay);
 		
 		// create link to hide lightbox
 		var gLightboxLoadingImageLink = document.createElement("a");
@@ -432,15 +474,16 @@
 		
 		// create loading image
 		var gLightboxLoadingImage = document.createElement("img");
-		gLightboxLoadingImage.src = LOADINGiMAGE;
+		gLightboxLoadingImage.src = LOADINGIMAGE;
 		gLightboxLoadingImage.id = 'gLightboxLoadingImage';
+		gLightboxLoadingImage.className = 'gL_hidden';
 		gLightboxLoadingImageLink.appendChild(gLightboxLoadingImage);
 		
 		// create lightbox div, same note about styles as above
 		var gLightbox = document.createElement("div");
 		gLightbox.id = 'gLightbox';
-		gLightbox.style.display = 'none';
-		objBody.insertBefore(gLightbox, gLightboxOverlay.nextSibling);
+		gLightbox.className = 'gL_hidden';
+		objBody.appendChild(gLightbox);
 		
 		// create link
 		var gLightboxLink = document.createElement("a");
@@ -451,20 +494,25 @@
 		// create image
 		var gLightboxImage = document.createElement("img");
 		gLightboxImage.id = 'gLightboxImage';
-		gLightboxImage.style.display = 'none';
+		gLightboxImage.className = 'gL_shown';
 		gLightboxLink.appendChild(gLightboxImage);
 		
 		// create error message
 		var gLightboxError = document.createElement("div");
 		gLightboxError.id = 'gLightboxError';
-		gLightboxError.style.display = 'none';
+		gLightboxError.className = 'gL_hidden';
 		gLightboxLink.appendChild(gLightboxError);
 		
 		// create caption
 		var gLightboxCaption = document.createElement("div");
 		gLightboxCaption.id = 'gLightboxCaption';
-		gLightboxCaption.style.display = 'none';
+		gLightboxCaption.className = 'gL_shown';
 		gLightbox.appendChild(gLightboxCaption);
+		
+		// create preloader
+		var gLightboxPreload = document.createElement("img");
+		gLightboxPreload.id = 'gLightboxPreload';
+		objBody.appendChild(gLightboxPreload);
 	}
 
 	// checkSITEINFO();
@@ -518,7 +566,11 @@
 		
 		for (var i = 0; i < links.length; i++) {
 			for (var j = 0; j < siteinfoToUse.length; j++) {
-				if (siteinfoToUse[j]['link'].test(links[i].href) && !(siteinfoToUse[j]['excludeLink'] && siteinfoToUse[j]['excludeLink'].test(links[i].href))) {
+				if (siteinfoToUse[j]['link'].test(links[i].href)) {
+					if (siteinfoToUse[j]['excludeLink'] && siteinfoToUse[j]['excludeLink'].test(links[i].href)) {
+						break;
+					}
+					
 					lastElement = imageLinks.length;
 					
 					// detect image url and title
@@ -540,7 +592,14 @@
 								backgroundColor: searchBackgroundColor(links[i]),
 							};
 							
-							if (DEBUG) { GM_log(i + " -> imageLinks[" + lastElement + "]\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']); }
+							// insert HTML and set event listener if get first image
+							if (lastElement == 0) {
+								insertHTML();
+								window.addEventListener('keyup', getKey, false);
+								window.addEventListener('resize', resizeLightboxAtEvent, false);
+							}
+							
+							if (DEBUG) { GM_log(i + " -> imageLinks[" + lastElement + "] (" + siteinfoToUse[j]['link'] + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']); }
 							
 							// set eventListener
 							setEvent(links[i], lastElement);
@@ -548,11 +607,6 @@
 					}
 				}
 			}
-		}
-		
-		// set event listener if discovery images
-		if (startElement == 0 && imageLinks.length > 0) {
-			document.addEventListener('keyup', getKey, false);
 		}
 		
 		if (DEBUG) { GM_log( "addImage: " + (new Date - startTime) + " ms"); }
@@ -585,7 +639,7 @@
 			if (imageUrl) {
 				imageUrl['title'] = (imageUrl['title'] || node.title || imageUrl['url']);
 				
-//					if (DEBUG) { GM_log("getImageUrl.page : " + imageUrl['url'] + ", " + imageUrl['title']); }
+//			if (DEBUG) { GM_log("getImageUrl.page : " + imageUrl['url'] + ", " + imageUrl['title']); }
 			}
 			
 			return imageUrl;
@@ -645,7 +699,7 @@
 			var nodes, url, imageUrl = {};
 			
 			if (xPath) {
-				nodes = getElementsByXPath((xPath || '.'), node);
+				nodes = getElementsByXPath(xPath, node);
 			} else {
 				nodes = [node];
 			}
@@ -692,39 +746,60 @@
 			stopEvents(event);
 			
 			switch (event.keyCode) {
-				case 79: // 'o'
-					stopSlideshow();
-					openImage(event, event.shiftKey);
+				case 67: // 'c'
+					if (!event.shiftKey && !event.ctrlKey) {
+						toggleCaption();
+					}
+					break;
+				case 86: // 'v'
+					if (!event.ctrlKey) {
+						stopSlideshow();
+						openImage(event, event.shiftKey);
+					}
 					break;
 				case 88: // 'x'
 				case 27: // Esc
-					stopSlideshow();
-					hideLightbox(event);
+					if (!event.shiftKey && !event.ctrlKey) {
+						stopSlideshow();
+						hideLightbox(event);
+					}
 					break;
 				case 49: // '1' + shiftKey -> '!'
-					if (event.shiftKey) {
+					if (event.shiftKey && !event.ctrlKey) {
 						startSlideshow();
 					}
 					break;
+				case 73: // 'k'
 				case 37: // Left(<-)
-					stopSlideshow();
-					loadAnotherImage(-1, event);
+					if (!event.shiftKey && !event.ctrlKey) {
+						stopSlideshow();
+						loadAnotherImage(-1, event);
+					}
 					break;
+				case 74: // 'j'
 				case 39: // Right(->)
-					stopSlideshow();
-					loadAnotherImage(1, event);
+					if (!event.shiftKey && !event.ctrlKey) {
+						stopSlideshow();
+						loadAnotherImage(1, event);
+					}
 					break;
-				case 38: // Up
+				case 36: // Home + ctrlKey
+				case 38: // Up + ctrlKey
 					if (event.ctrlKey) {
 						stopSlideshow();
 						loadAnotherImage(-imageLinks.nowViewing, event);
 					}
+					
 					break;
-				case 40: // Down
+				case 35: // End + ctrlKey
 					if (event.ctrlKey) {
 						stopSlideshow();
 						loadAnotherImage(-(imageLinks.nowViewing + 1), event);
 					}
+					
+					break;
+				default:
+//				if (DEBUG) { GM_log("keyCode is " + event.keyCode); }
 					break;
 			}
 		}
@@ -734,12 +809,7 @@
 	function openImage(event, newWindow, element) {
 		stopEvents(event);
 		
-		var suffix = (element || imageLinks.nowViewing);
-		var link = imageLinks[suffix]['link'];
-		
-		if (isUrlJavaScript(link)) {
-			link = imageLinks[suffix]['imageUrl'];
-		}
+		link = openImageGetUrl(element || imageLinks.nowViewing);
 		
 		if (newWindow) {
 			GM_openInTab(link);
@@ -747,6 +817,18 @@
 			location.href = link;
 		}
 }
+
+	// openImageGetUrl(element)
+	function openImageGetUrl(element) {
+		var link = imageLinks[element]['link'];
+		
+		if (isUrlJavaScript(link)) {
+			link = imageLinks[element]['imageUrl'];
+		}
+		
+		return link;
+	}
+
 
 	// startSlideshow()
 	function startSlideshow() {
@@ -809,6 +891,7 @@
 			// prep objects
 			var gLightbox             = document.getElementById('gLightbox');
 			var gLightboxImage        = document.getElementById('gLightboxImage');
+			var gLightboxError        = document.getElementById('gLightboxError');
 			var gLightboxCaption      = document.getElementById('gLightboxCaption');
 			var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
 			var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
@@ -816,78 +899,35 @@
 			
 			// get page size and viewport
 			var sizeAndPosition = getSizeAndPosition();
-			var displayPosition = calculateDisplayPosition(sizeAndPosition, gLightboxLoadingImage.naturalWidth, gLightboxLoadingImage.naturalHeight);
 			
 			// center loadingImage
-			gLightboxLoadingImage.style.top = displayPosition['y'] + 'px';
-			gLightboxLoadingImage.style.left = displayPosition['x'] + 'px';
-			gLightboxLoadingImage.style.display = 'block';
+			gLightboxLoadingImage.style.top  = sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 20 - gLightboxLoadingImage.naturalHeight) / 2) + 'px';
+			gLightboxLoadingImage.style.left = ((sizeAndPosition['page']['x'] - 20 - gLightboxLoadingImage.naturalWidth) / 2) + 'px';
+			toggleDisplay(gLightboxLoadingImage);
 			
 			// set height of Overlay to take up whole page and show
 			gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
-			gLightboxOverlay.style.display = 'block';
+			toggleDisplay(gLightboxOverlay);
 			
 			// after preloading image, places new image in lightbox then centers.
 			preloaded = function() {
 				// load image
 				gLightboxImage.src = gLightboxPreload.src;
-				gLightboxImage.style.display = 'inline';
-				
-				// After image is loaded, update the overlay height as the new image might have
-				// increased the overall page height.
-				sizeAndPosition = getSizeAndPosition();
-				gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
-				
-				// get image size
-				var imageSize = {
-					x: gLightboxPreload.naturalWidth,
-					y: gLightboxPreload.naturalHeight,
-				};
-				// copy values of a object
-				var displaySize = {
-					x: imageSize['x'],
-					y: imageSize['y'],
-				};
-				
-				// center lightbox and make sure that the top and left values are not negative
-				// and the image placed outside the viewport
-				displayPosition = calculateDisplayPosition(sizeAndPosition, imageSize['x'], imageSize['y']);
-				
-				// resize if image is larger than screen size
-				if (displayPosition['y'] - sizeAndPosition['position']['y'] < 0 || displayPosition['x'] - sizeAndPosition['position']['x'] < 0) {
-					// which too bigs?
-					if (imageSize['y'] / sizeAndPosition['window']['y'] > imageSize['x'] / sizeAndPosition['window']['x']) {
-						// height is too big
-						displaySize['y'] = sizeAndPosition['window']['y'] - 60;
-						displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
-						
-						displayPosition = calculateDisplayPosition(sizeAndPosition, displaySize['x'], displaySize['y']);
-					} else {
-						// width is too big
-						displaySize['x'] = sizeAndPosition['page']['x'] - 20;
-						displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
-						
-						displayPosition = calculateDisplayPosition(sizeAndPosition, displaySize['x'], displaySize['y']);
-					}
+				if (gLightboxError.className == 'gL_shown') {
+					toggleDisplay(gLightboxError);
+					toggleDisplay(gLightboxImage);
 				}
 				
-				if (DEBUG) { GM_log("loading: " + gLightboxPreload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
-				
-				// set css
-				gLightbox.style.left = displayPosition['x'] + 'px';
-				gLightbox.style.top  = displayPosition['y'] + 'px';
-				gLightboxImage.style.width  = displaySize['x'] + 'px';
-				gLightboxImage.style.height = displaySize['y'] + 'px';
-				gLightboxCaption.style.width = displaySize['x'] + 'px';
+				// resize image
+				resizeLightbox(gLightboxPreload.naturalWidth, gLightboxPreload.naturalHeight);
 				
 				// after loading image, view image
 				loaded = function() {
 					gLightboxImage.title = imageLinks[element]['title'];
 					gLightboxImage.style.backgroundColor = imageLinks[element]['backgroundColor'];
 					
-					gLightbox.style.display = 'block';
-					gLightboxCaption.style.display = 'block';
-					gLightboxLoadingImage.style.display = 'none';
+					toggleDisplay(gLightbox);
+					toggleDisplay(gLightboxLoadingImage);
 					
 					// remove event listener
 					gLightboxImage.removeEventListener('load', loaded, false);
@@ -905,7 +945,7 @@
 			
 			// preload image and set caption
 			gLightboxPreload.src = imageLinks[element]['imageUrl'];
-			gLightboxCaption.innerHTML = imageLinks[element]['title'] + '<br /><a href="' + imageLinks[element]['link'] + '">View image on original page.</a>';
+			gLightboxCaption.innerHTML = imageLinks[element]['title'] + '<br /><a href="' + openImageGetUrl(element) + '">View image on original page.</a>';
 			imageLinks.nowViewing = element;
 		}
 	}
@@ -930,17 +970,18 @@
 			}
 			
 			// remove event listener
-			gLightboxPreload.removeEventListener('load', preloaded, false);
-			gLightboxPreload.removeEventListener('error', errorMessage, false);
+			try {
+				gLightboxImage.removeEventListener('load', loaded, false);
+				gLightboxPreload.removeEventListener('load', preloaded, false);
+				gLightboxPreload.removeEventListener('error', errorMessage, false);
+			} catch(error) {}
 			
 			// remove image
 			gLightboxImage.src = '';
-			gLightboxImage.style.display = 'none';
 			
 			// hide lightbox and overlay
-			gLightbox.style.display = 'none';
-			gLightboxError.style.display = 'none';
-			gLightboxOverlay.style.display = 'none';
+			toggleDisplay(gLightbox);
+			toggleDisplay(gLightboxOverlay);
 			
 			// reset imageLinks.nowViewing
 			imageLinks.nowViewing = -1;
@@ -959,50 +1000,142 @@
 		
 		gLightboxError.innerHTML = 'This file is not found!';
 		
-		var imageSize = { x: 600, y: 50, };
+		// resize image box
+		resizeLightbox(600, 50);
 		
+		gLightboxImage.src = '';
+		
+		toggleDisplay(gLightbox);
+		toggleDisplay(gLightboxImage);
+		toggleDisplay(gLightboxError);
+		toggleDisplay(gLightboxLoadingImage);
+		
+		// remove event listener
+		try {
+			gLightboxImage.removeEventListener('load', loaded, false);
+			gLightboxPreload.removeEventListener('load', preloaded, false);
+			gLightboxPreload.removeEventListener('error', errorMessage, false);
+		} catch(error) {}
+	}
+
+	// resizeLightbox(imageWidth, imageHeight)
+	function resizeLightbox(imageWidth, imageHeight) {
+		// prep objects
+		var gLightbox             = document.getElementById('gLightbox');
+		var gLightboxImage        = document.getElementById('gLightboxImage');
+		var gLightboxError        = document.getElementById('gLightboxError');
+		var gLightboxCaption      = document.getElementById('gLightboxCaption');
+		var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
+		var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
+		var gLightboxPreload      = document.getElementById('gLightboxPreload');
+		
+		// After image is loaded, update the overlay height as the new image might have
+		// increased the overall page height.
 		var sizeAndPosition = getSizeAndPosition();
-		var displayPosition = calculateDisplayPosition(sizeAndPosition, imageSize['x'], imageSize['y']);
+		gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
 		
-//	if (DEBUG) { GM_log("loading: error message (" + imageSize['y'] + "x" + imageSize['x'] + ")") };
+		// caption is shown?
+		var captionShown = (gLightboxCaption.className == 'gL_shown');
+		
+		var captionHeight = function(imageWidth, imageHeight) {
+			return (captionShown ? ((imageWidth > imageHeight) ? 35 : 50) : 0);
+		}
+		// calculate display position
+		var calculateDisplayPosition = function(imageWidth, imageHeight) {
+			return {
+				x: ((sizeAndPosition['page']['x'] - 20 - imageWidth) / 2),
+				y: sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight) - imageHeight) / 2),
+			}
+		};
+		
+		// get image size and copy values of a object
+		var imageSize =   { x: imageWidth, y: imageHeight };
+		var displaySize = { x: imageWidth, y: imageHeight };
+		
+		// center lightbox and make sure that the top and left values are not negative
+		// and the image placed outside the viewport
+		displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
+		
+		// resize if image is larger than screen size
+		if ((displayPosition['y'] < sizeAndPosition['position']['y']) || (displayPosition['x'] < sizeAndPosition['position']['x'])) {
+			// which too bigs?
+			if ((imageSize['y'] / sizeAndPosition['window']['y']) > (imageSize['x'] / sizeAndPosition['window']['x'])) {
+				// height is too big
+				displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
+				displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
+				
+				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+			} else {
+				// width is too big
+				displaySize['x'] = sizeAndPosition['page']['x'] - 20;
+				displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
+				
+				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+			}
+		}
+		
+		if (DEBUG) { GM_log("loading: " + gLightboxPreload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
 		
 		// set css
 		gLightbox.style.left = displayPosition['x'] + 'px';
 		gLightbox.style.top  = displayPosition['y'] + 'px';
-		gLightboxCaption.style.width = imageSize['x'] + 'px';
-
-		gLightboxImage.src = '';
-		gLightboxImage.style.display = 'none';
-		
-		gLightboxError.style.display = 'block';
-		gLightboxCaption.style.display = 'block';
-		gLightbox.style.display = 'block';
-		gLightboxLoadingImage.style.display = 'none';
-		
-		gLightboxPreload.removeEventListener('load', preloaded, false);
-		gLightboxPreload.removeEventListener('error', errorMessage, false);
+		gLightboxImage.style.width  = displaySize['x'] + 'px';
+		gLightboxImage.style.height = displaySize['y'] + 'px';
+		gLightboxCaption.style.width = displaySize['x'] + 'px';
 	}
 
-	// calculate display position
-	function calculateDisplayPosition(sizeAndPosition, imageWidth, imageHeight) {
-		return {
-			x: ((sizeAndPosition['page']['x'] - 20 - imageWidth) / 2),
-			y: sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 60 - imageHeight) / 2),
+	// resizeLightboxAtEvent(event)
+	function resizeLightboxAtEvent(event) {
+		var gLightboxImage = document.getElementById('gLightboxImage');
+		
+		if (lightboxShown()){
+			if (gLightboxImage.className == 'gL_shown') {
+				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight);
+			} else {
+				resizeLightbox(600, 50);
+			}
 		}
-	};
+	}
 	
+	// toggleCaption()
+	function toggleCaption() {
+		var gLightboxImage   = document.getElementById('gLightboxImage');
+		var gLightboxCaption = document.getElementById('gLightboxCaption');
+		
+		toggleDisplay(gLightboxCaption);
+		
+		if (lightboxShown()){
+			if (gLightboxImage.className == 'gL_shown') {
+				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight);
+			} else {
+				resizeLightbox(600, 50);
+			}
+		}
+	}
+
+	// toggleDisplay(node)
+	function toggleDisplay(node) {
+		switch (node.className) {
+			case 'gL_hidden':
+				node.className = 'gL_shown';
+				break;
+			case 'gL_shown':
+				node.className = 'gL_hidden';
+				break;
+		}
+	}
+
 	// lightbox is shown?
 	function lightboxShown() {
 		var gLightbox = document.getElementById('gLightbox');
 		
-		return (gLightbox.style.display != 'none');
+		return (gLightbox.className == 'gL_shown');
 	}
 
 	// ====================
 	// Main routine
 	// ====================
 
-	insertHTML();
 	checkSITEINFO();
 	checkNodes();
 	
