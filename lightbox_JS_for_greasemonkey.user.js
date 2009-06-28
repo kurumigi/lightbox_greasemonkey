@@ -105,7 +105,7 @@
 		
 		// Impress Watch (type3)
 		{
-			url:          /^http:\/\/www\.watch\.impress\.co\.jp\/akiba\//i,
+			url:          /^http:\/\/(?:akiba-pc\.watch\.impress\.co\.jp|www\.watch\.impress\.co\.jp\/akiba)\//i,
 			function:     'page',
 			link:         /(\/(?:image\d{8}|\d{8}\/image)\/[\w-]+)\.html/i,
 			replace:      '$1.jpg',
@@ -178,6 +178,9 @@
 			link:         /^http:\/\/www\.pixiv\.net\/member_illust\.php\?mode=(?:medium|big)&illust_id=/i,
 			thumbnail:    /(\/\d+)_[sm]\.(jpg|png|gif)/i,
 			replace:      '$1.$2',
+			extra:        {
+				titleXPath: 	'./following-sibling::div[@class="pdgTop5"]',
+			},
 		},
 
 		// deviantart
@@ -196,42 +199,64 @@
 			link:         /^http:\/\/(?:www\.)?gelbooru\.com\/index\.php\?page=post&s=view&id=/i,
 			thumbnail:    /^http:\/\/(?:www\.)?gelbooru\.com\/thumbs\/\d+\/thumnail_\w+\.jpg/i,
 			extra:        {
-				image:      	/http:\/\/img\d+\.gelbooru\.com\/images\/\d+\/\w+\.(?:jpe?g|png|gif|bmp)(?:\?.*?)?(?=")/i, // "
+				image:      	/http:\/\/img\d+\.gelbooru\.com\/\/?(?:images|samples)\/\d+\/[\w_]+\.(?:jpe?g|png|gif|bmp)(?:\?\d+?)?(?=")/i, // "
 			},
 		},
 
-		// danbooru / nekobooru (with supplementary script)
+		// danbooru / nekobooru / sankaku channel (with supplementary script)
 		{
-			url:          /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net)\/(?!post\/show\/\d+)/i,
+			url:          /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net|chan\.sankakucomplex\.com)\/(?!post\/show\/\d+)/i,
 			function:     'page',
-			link:         /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net)\/post\/show\/\d+(?:\/|$)/i,
-			thumbnail:    /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net)\/data\/(?!preview\/)[\/\w]+\.(?:jpg|png|gif|bmp)/i,
+			link:         /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net|chan\.sankakucomplex\.com)\/post\/show\/\d+(?:\/|$)/i,
+			thumbnail:    /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net|chan\.sankakucomplex\.com)\/data\/(?!preview\/)[\/\w-]+\.(?:jpg|png|gif|bmp)/i,
 			extra:        {
 				xPath:      	'./span[@class="hidden"]',
+				titleXPath: 	'./img[@title]',
 			},
 		},
 
-		// mixi
+		// imagefap
 		{
-			url:          /^http:\/\/mixi.jp\/view_(?:diary|bbs)\.pl/i,
-			function:     '',
-			link:         /^javascript\:void\(0\);$/,
-			getImageUrl:  function(node) {
-				var searchText, htmlUrl, html, imageUrl = {};
-				
-				searchText = /<img SRC="(http:\/\/ic\.mixi\.jp\/p\/\w+\/\w+\/(?:diary|bbs_comm)\/\d+_\d+\.jpg)" BORDER=0>/i;
-				
-				try {
-					htmlUrl = absolutePath(/MM_openBrWindow\('(.+?)'.*\)/.exec(getElementsByXPath('./@onclick', node)[0].nodeValue)[1]);
-					
-					html = getImageUrls._getFile(htmlUrl);
-					
-					imageUrl['url']   = html.match(searchText)[0].replace(searchText, '$1');
-					imageUrl['title'] = imageUrl['url'];
-				} catch (error) {}
-				
-				return imageUrl;
-			},
+			url:          /^https?:\/\/(.*?\.)?imagefap\.com/i,
+			function:     'page',
+			link:         /\/image.php\?id=|gallery\/\d+/i,
+			thumbnail:    /\/images\/(?:thumb|mini)\/(\d+)\/(\d+)\/(\d+)\.jpg/i,
+			replace:      '/images/full/$1/$2/$3.jpg',
+		},
+
+		// subvariance
+		{
+			url:          /^https?:\/\/(.*?\.)?subvariance\.com/i,
+			function:     'page',
+			link:         /\/image\/[0-9]+/i,
+			thumbnail:    /(\/\/images\/\d+\/\d+)\/[a-z]\.(jpg|JPG)/i,
+			replace:      '$1/l.$2',
+		},
+
+		// FFFFOUND!
+		{
+			url:          /^https?:\/\/(?:.*?\.)?ffffound\.com/i,
+			function:     'page',
+			link:         /\/image\/\w+$/i,
+			thumbnail:    /(img)(?:-thumb)?(\.ffffound\.com\/static-data\/assets\/\w\/\w+?)(?:_[a-z]+)?(\.jpe?g|gif|png)$/i,
+			replace:      '$1$2$3',
+		},
+
+		// imagesocket
+		{
+			url:          /:\/\//i,
+			function:     'page',
+			link:         /^(https?:\/\/)(?:.*?\.)?imagesocket\.com\/(?:view|thumbs|images)\/(.*?\.(?:jpe?g|gif|png))$/i,
+			replace:      '$1content.imagesocket.com/images/$2',
+		},
+
+		// flickr
+		{
+			url:          /^https?:\/\/(?:.*?\.)?flickr\.com/i,
+			function:     'page',
+			link:         /\/photos\/[^\/]+\/[0-9]+/i,
+			thumbnail:    /_[tsm]\.jpg/i,
+			replace:      '.jpg',
 		},
 
 		// Hatena (type1)
@@ -250,13 +275,25 @@
 			thumbnail:    /^(.+\.(?:jpe?g|gif|png))$/i,
 		},
 
-		// flickr
+		// myspace
 		{
-			url:          /^https?:\/\/(.*?\.)?flickr\.com/i,
+			url:          /^https?:\/\/(?:.*?\.)?myspace\.com/i,
 			function:     'page',
-			link:         /\/photos\/[^\/]+\/[0-9]+/i,
-			thumbnail:    /_[tsm]\.jpg/i,
-			replace:      '.jpg',
+			link:         /imageID=\d+/i,
+			thumbnail:    /m_(.+)\.jpg/i,
+			replace:      'l_$1.jpg',
+		},
+
+		// mixi
+		{
+			url:          /^http:\/\/mixi.jp\/view_(?:diary|bbs)\.pl/i,
+			function:     'parseHTMLs',
+			link:         /(?:^javascript\:void\(0\);$|MM_openBrWindow\('(.+?)'.*\))/,
+			replace:      '$1',
+			extra:        {
+				xPath:      	'./@onclick',
+				image:      	/http:\/\/ic\.mixi\.jp\/p\/\w+\/\w+\/(?:diary|bbs_comm)\/\d+_\d+\.jpg(?=")/i, // "
+			},
 		},
 
 		// normal links to images
@@ -376,7 +413,7 @@
 			backgroundColor = getComputedStyle(checkNode, '').backgroundColor;
 			
 			checkNode = checkNode.parentNode;
-		} while ((backgroundColor == '' || backgroundColor == 'transparent') && !(checkNode.nodeName == '#document'))
+		} while ((backgroundColor == '' || backgroundColor == 'transparent') && checkNode && (checkNode.nodeName != '#document'))
 		
 		return backgroundColor;
 	}
@@ -584,6 +621,7 @@
 						// if duplicate images, reuse before event
 						if (lastElement > 0 && (links[i].href == imageLinks[lastElement - 1]['link']) && !(isUrlJavaScript(links[i].href))) {
 							setEvent(links[i], lastElement - 1);
+							if (DEBUG) { GM_log(i + " -> imageLinks[" + (lastElement - 1) + "] (" + siteinfoToUse[j]['link'] + ")\n" + imageLinks[lastElement - 1]['link'] + "\n" + imageLinks[lastElement - 1]['imageUrl'] + "\n" + imageLinks[lastElement - 1]['title'] + "\n" + imageLinks[lastElement - 1]['backgroundColor']); }
 						} else {
 							imageLinks[lastElement] = {
 								link:            links[i].href,
@@ -599,10 +637,11 @@
 								window.addEventListener('resize', resizeLightboxAtEvent, false);
 							}
 							
-							if (DEBUG) { GM_log(i + " -> imageLinks[" + lastElement + "] (" + siteinfoToUse[j]['link'] + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']); }
-							
 							// set eventListener
 							setEvent(links[i], lastElement);
+							if (DEBUG) { GM_log(i + " -> imageLinks[" + lastElement + "] (" + siteinfoToUse[j]['link'] + ")\n" + imageLinks[lastElement]['link'] + "\n" + imageLinks[lastElement]['imageUrl'] + "\n" + imageLinks[lastElement]['title'] + "\n" + imageLinks[lastElement]['backgroundColor']); }
+							
+							break;
 						}
 					}
 				}
@@ -618,11 +657,12 @@
 		// ---------------
 		
 		// get image urls from this page.
-		// extra.xPath   : String : xPath of search element.
+		// extra.xPath      : String : xPath of search element.
+		// extra.TitleXPath : String : xPath of title.
 		page: function(node, siteinfoToUse) {
 //		if (DEBUG) { GM_log("getImageUrl.page(node, (" + siteinfoToUse['url'] + ", " + siteinfoToUse['link'] + ", " + siteinfoToUse['thumbnail'] + ", " + siteinfoToUse['replace'] + " ))" ) };
 			
-			var imageUrl = {}, xPath;
+			var xPath, imageNode, imageTitle, imageUrl = {}, thumbnailUrl = {};
 			
 			if (siteinfoToUse['extra'] && siteinfoToUse['extra']['xPath']) {
 				xPath = siteinfoToUse['extra']['xPath'];
@@ -637,7 +677,21 @@
 			imageUrl = this._matchUrl(node, (siteinfoToUse['thumbnail'] || siteinfoToUse['link']), siteinfoToUse['replace'], xPath);
 			
 			if (imageUrl) {
-				imageUrl['title'] = (imageUrl['title'] || node.title || imageUrl['url']);
+				if (siteinfoToUse['extra'] && siteinfoToUse['extra']['titleXPath']) {
+					imageNode = getFirstElementByXPath(siteinfoToUse['extra']['titleXPath'], node);
+					
+					imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+				}
+				
+				if (siteinfoToUse['thumbnail']) {
+					thumbnailUrl = this._matchUrl(node, siteinfoToUse['thumbnail'], '', './/img[@src]');
+					
+					if (thumbnailUrl) {
+						imageTitle = (imageTitle || thumbnailUrl['title']);
+					}
+				}
+				
+				imageUrl['title'] = (imageTitle || imageUrl['title'] || node.title || imageUrl['url']);
 				
 //			if (DEBUG) { GM_log("getImageUrl.page : " + imageUrl['url'] + ", " + imageUrl['title']); }
 			}
@@ -646,13 +700,14 @@
 		},
 		
 		// get image url from linked pages
-		// extra.xPath   : String : xPath of search element.
-		// extra.image   : RegExp : search url from linked page.
-		// extra.replace : String : replace extra.image
+		// extra.xPath      : String : xPath of search element.
+		// extra.TitleXPath : String : xPath of title.
+		// extra.image      : RegExp : search url from linked page.
+		// extra.replace    : String : replace extra.image
 		parseHTMLs: function(node, siteinfoToUse) {
 //		if (DEBUG) { GM_log("getImageUrl.parseHTMLs(node, (" + siteinfoToUse['url'] + ", " + siteinfoToUse['link'] + ", "  + siteinfoToUse['thumbnail'] + ", " + siteinfoToUse['replace'] + ", ( " + siteinfoToUse['extra']['image'] + ", " + siteinfoToUse['extra']['replace'] + " )))" ) };
 			
-			var htmlUrl, html, imageUrl = {}, thumbnailUrl = {};
+			var htmlUrl, html, imageNode, imageTitle, imageUrl = {}, thumbnailUrl = {};
 			
 			if (siteinfoToUse['extra'] && siteinfoToUse['extra']['xPath']) {
 				xPath = siteinfoToUse['extra']['xPath'];
@@ -662,24 +717,30 @@
 			
 //		if (DEBUG) { GM_log("getImageUrl.parseHTMLs : xPath is " + xPath) };
 			
-			htmlUrl = this._matchUrl(node, siteinfoToUse['link'], siteinfoToUse['replace'], xPath);
-			
-//		if (DEBUG) { GM_log("getImageUrl.parseHTMLs : parsing " + htmlUrl['url']) };
+			htmlUrl = this._matchUrl(node, (siteinfoToUse['link']), siteinfoToUse['replace'], xPath);
 			
 			if (htmlUrl) {
 				try {
+//				if (DEBUG) { GM_log("getImageUrl.parseHTMLs : parsing " + htmlUrl['url']) };
+					
 					html = this._getFile(htmlUrl['url']);
 					
 					imageUrl['url'] = html.match(siteinfoToUse['extra']['image'])[0].replace(siteinfoToUse['extra']['image'], siteinfoToUse['extra']['replace']);
+					
+					if (siteinfoToUse['extra'] && siteinfoToUse['extra']['titleXPath']) {
+						imageNode = getFirstElementByXPath(siteinfoToUse['extra']['titleXPath'], node);
+						
+						imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+					}
 					
 					if (siteinfoToUse['thumbnail']) {
 						thumbnailUrl = this._matchUrl(node, siteinfoToUse['thumbnail'], '', './/img[@src]');
 						
 						if (thumbnailUrl) {
-							imageUrl['title'] = (thumbnailUrl['title'] || imageUrl['url']);
+							imageTitle = (imageTitle || thumbnailUrl['title']);
 						}
 					} 
-					imageUrl['title'] = (imageUrl['title'] || node.title || imageUrl['url']);
+					imageUrl['title'] = (imageTitle || node.title || imageUrl['url']);
 					
 //				if (DEBUG) { GM_log("getImageUrl.parseHTMLs : " + imageUrl['url'] + ", " + imageUrl['title']); }
 				} catch (error) {}
@@ -746,11 +807,6 @@
 			stopEvents(event);
 			
 			switch (event.keyCode) {
-				case 67: // 'c'
-					if (!event.shiftKey && !event.ctrlKey) {
-						toggleCaption();
-					}
-					break;
 				case 86: // 'v'
 					if (!event.ctrlKey) {
 						stopSlideshow();
@@ -797,6 +853,26 @@
 						loadAnotherImage(-(imageLinks.nowViewing + 1), event);
 					}
 					
+					break;
+				case 67: // 'c'
+					if (!event.shiftKey && !event.ctrlKey) {
+						toggleCaption();
+					}
+					break;
+				case 82: // 'r'
+					if (!event.shiftKey && !event.ctrlKey) {
+						resizeLightboxAtCommand('normal');
+					}
+					break;
+				case 87: // 'w'
+					if (!event.shiftKey && !event.ctrlKey) {
+						resizeLightboxAtCommand('width');
+					}
+					break;
+				case 72: // 'h'
+					if (!event.shiftKey && !event.ctrlKey) {
+						resizeLightboxAtCommand('height');
+					}
 					break;
 				default:
 //				if (DEBUG) { GM_log("keyCode is " + event.keyCode); }
@@ -923,6 +999,7 @@
 				
 				// after loading image, view image
 				loaded = function() {
+					// set title and background color
 					gLightboxImage.title = imageLinks[element]['title'];
 					gLightboxImage.style.backgroundColor = imageLinks[element]['backgroundColor'];
 					
@@ -1018,8 +1095,8 @@
 		} catch(error) {}
 	}
 
-	// resizeLightbox(imageWidth, imageHeight)
-	function resizeLightbox(imageWidth, imageHeight) {
+	// resizeLightbox(imageWidth, imageHeight, resizeType)
+	function resizeLightbox(imageWidth, imageHeight, resizeType) {
 		// prep objects
 		var gLightbox             = document.getElementById('gLightbox');
 		var gLightboxImage        = document.getElementById('gLightboxImage');
@@ -1029,16 +1106,14 @@
 		var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
 		var gLightboxPreload      = document.getElementById('gLightboxPreload');
 		
-		// After image is loaded, update the overlay height as the new image might have
-		// increased the overall page height.
+		// get page size and viewport
 		var sizeAndPosition = getSizeAndPosition();
-		gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
 		
 		// caption is shown?
 		var captionShown = (gLightboxCaption.className == 'gL_shown');
 		
 		var captionHeight = function(imageWidth, imageHeight) {
-			return (captionShown ? ((imageWidth > imageHeight) ? 35 : 50) : 0);
+			return (captionShown ? ((imageWidth >= imageHeight) ? 35 : 50) : 0);
 		}
 		// calculate display position
 		var calculateDisplayPosition = function(imageWidth, imageHeight) {
@@ -1056,22 +1131,61 @@
 		// and the image placed outside the viewport
 		displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
 		
+		// resize routines
+		var resize = {
+			normal : function() {
+				// which too bigs?
+				if ((imageSize['y'] / sizeAndPosition['window']['y']) > (imageSize['x'] / sizeAndPosition['window']['x'])) {
+					// height is too big
+					displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
+					displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
+					
+					displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+				} else {
+					// width is too big
+					displaySize['x'] = sizeAndPosition['page']['x'] - 20;
+					displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
+					
+					displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+				}
+			},
+			width  : function() {
+				displaySize['x'] = sizeAndPosition['page']['x'] - 20;
+				
+				if (displaySize['x'] >= imageSize['x']) {
+					displaySize['x'] = imageSize['x'];
+					displaySize['y'] = imageSize['y'];
+				} else {
+					displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
+				}
+				
+				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+				
+				if (sizeAndPosition['position']['y'] > displayPosition['y']) {
+					displayPosition['y'] = sizeAndPosition['position']['y'];
+				}
+			},
+			height : function() {
+				displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
+				
+				if (displaySize['y'] >= imageSize['y']) {
+					displaySize['y'] = imageSize['y'];
+					displaySize['x'] = imageSize['x'];
+				} else {
+					displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
+				}
+				
+				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
+				
+				if (sizeAndPosition['position']['x'] > displayPosition['x']) {
+					displayPosition['x'] = sizeAndPosition['position']['x'];
+				}
+			},
+		}
+		
 		// resize if image is larger than screen size
 		if ((displayPosition['y'] < sizeAndPosition['position']['y']) || (displayPosition['x'] < sizeAndPosition['position']['x'])) {
-			// which too bigs?
-			if ((imageSize['y'] / sizeAndPosition['window']['y']) > (imageSize['x'] / sizeAndPosition['window']['x'])) {
-				// height is too big
-				displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
-				displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
-				
-				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
-			} else {
-				// width is too big
-				displaySize['x'] = sizeAndPosition['page']['x'] - 20;
-				displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
-				
-				displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
-			}
+			resize[resizeType || 'normal']();
 		}
 		
 		if (DEBUG) { GM_log("loading: " + gLightboxPreload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
@@ -1082,6 +1196,11 @@
 		gLightboxImage.style.width  = displaySize['x'] + 'px';
 		gLightboxImage.style.height = displaySize['y'] + 'px';
 		gLightboxCaption.style.width = displaySize['x'] + 'px';
+		
+		// After image is loaded, update the overlay height as the new image might have
+		// increased the overall page height.
+		sizeAndPosition = getSizeAndPosition();
+		gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
 	}
 
 	// resizeLightboxAtEvent(event)
@@ -1091,6 +1210,19 @@
 		if (lightboxShown()){
 			if (gLightboxImage.className == 'gL_shown') {
 				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight);
+			} else {
+				resizeLightbox(600, 50);
+			}
+		}
+	}
+	
+	// resizeLightboxAtCommand(resizeType)
+	function resizeLightboxAtCommand(resizeType) {
+		var gLightboxImage = document.getElementById('gLightboxImage');
+		
+		if (lightboxShown()){
+			if (gLightboxImage.className == 'gL_shown') {
+				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight, resizeType);
 			} else {
 				resizeLightbox(600, 50);
 			}
