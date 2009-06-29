@@ -320,8 +320,9 @@
 	var imageLinks = []
 	imageLinks.nowViewing = -1;
 	
-	// intervalID of slideshow
-	var intervalID = undefined;
+	// slideshow flag and timeout ID
+	var slideshow = false;
+	var timeoutID = undefined;
 	
 	// ====================
 	// Utility functions
@@ -908,23 +909,22 @@
 
 	// startSlideshow()
 	function startSlideshow() {
-		if (!(intervalID)) {
-			if (!(lightboxShown())) {
-				showLightbox('',0);
-			}
-			
-			intervalID = setInterval(function() {
-				loadAnotherImage(1);
-			}, 3 * 1000);
+		slideshow = true;
+		
+		if (lightboxShown()) {
+			loadAnotherImage(1);
+		} else {
+			showLightbox('',0);
 		}
 	}
 
 	// stopSlideshow()
 	function stopSlideshow() {
-		if (intervalID) {
-			clearInterval(intervalID);
+		if (timeoutID) {
+			clearTimeout(timeoutID);
 			
-			intervalID = undefined;
+			slideshow = false;
+			timeoutID = undefined;
 		}
 	}
 
@@ -1008,6 +1008,14 @@
 					
 					// remove event listener
 					gLightboxImage.removeEventListener('load', loaded, false);
+					
+					// run setTimeout if slideshow mode.
+					if (slideshow) {
+						timeoutID = window.setTimeout(function() {
+							loadAnotherImage(1);
+						}, 3 * 1000);
+					}
+					
 				}
 				// set event listener
 				gLightboxImage.addEventListener('load', loaded , false);
