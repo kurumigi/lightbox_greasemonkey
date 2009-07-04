@@ -36,15 +36,31 @@
 
 	// SITEINFO
 	var SITEINFO = [
-		/* sample
+		/* help
+			url          : RegExp   : URL of pages.
+			function     : String   : function name.
+			link         : RegExp   : search URL of link.
+			excludeLink  : RegExp   : [optional] exclude URL of links.
+			thumbnail    : RegExp   : [optional] search URL of thumbnail images.
+			xPath        : String   : [optional] xPath of search elements (link or thumbnail).
+			replace      : String   : [optional] replace string of search elements (link or thumbnail).
+			titleXPath   : String   : [optional] xPath of title.
+			image        : RegExp   : [only if function == 'parseHTMLs'] search URL from linked page.
+			imageReplace : String   : [only if function == 'parseHTMLs'] replace string of image.
+			getImageUrl  : Function : [only if function == ''] function to get image URLs.
+		*/
+		/* template
 		{
 			url:          //,
 			function:     '',
 			link:         //,
 			excludeLink:  //,
 			thumbnail:    //,
+			xPath:        '',
 			replace:      '',
-			extra:        {},
+			titleXPath:   '',
+			image:        //,
+			imageReplace: '',
 			getImageUrl:  function(node) { return ... },
 		},
 		*/
@@ -97,10 +113,8 @@
 			function:     'parseHTMLs',
 			link:         /cda\/parts\/image_for_link\/[\d-]+\.html/i,
 			thumbnail:    /\/cda\/static\/image\/\d{4}\/\d{2}\/\d{2}\/[\w-]+?_?s\.(?:jpg|png)$/i,
-			extra:        {
-				image:      	/\/cda\/static\/image\/\d{4}\/\d{2}\/\d{2}\/[\w-]+\.(?:jpg|png)(?=")/i, // "
-				replace:    	'http://k-tai.impress.co.jp/$1',
-			},
+			image:        /\/cda\/static\/image\/\d{4}\/\d{2}\/\d{2}\/[\w-]+\.(?:jpg|png)(?=")/i, // "
+			imageReplace: 'http://k-tai.impress.co.jp/$1',
 		},
 		
 		// Impress Watch (type3)
@@ -176,11 +190,9 @@
 			url:          /^http:\/\/www\.pixiv\.net\//i,
 			function:     'page',
 			link:         /^http:\/\/www\.pixiv\.net\/member_illust\.php\?mode=(?:medium|big)&illust_id=/i,
-			thumbnail:    /(\/\d+)_[sm]\.(jpg|png|gif)/i,
+			thumbnail:    /(\/\d+)_(?:[sm]|100)\.(jpg|png|gif)/i,
 			replace:      '$1.$2',
-			extra:        {
-				titleXPath: 	'./following-sibling::div[@class="pdgTop5"] | //div[@class="f18b"]/text()',
-			},
+			titleXPath:   './following-sibling::div[@class="pdgTop5"] | //div[@class="f18b"]/text()',
 		},
 
 		// deviantart
@@ -198,9 +210,7 @@
 			function:     'parseHTMLs',
 			link:         /^http:\/\/(?:www\.)?gelbooru\.com\/index\.php\?page=post&s=view&id=/i,
 			thumbnail:    /^http:\/\/(?:www\.)?gelbooru\.com\/thumbs\/\d+\/thumnail_\w+\.jpg/i,
-			extra:        {
-				image:      	/http:\/\/img\d+\.gelbooru\.com\/\/?(?:images|samples)\/\d+\/[\w_]+\.(?:jpe?g|png|gif|bmp)(?:\?\d+?)?(?=")/i, // "
-			},
+			image:        /http:\/\/img\d+\.gelbooru\.com\/\/?(?:images|samples)\/\d+\/[\w_]+\.(?:jpe?g|png|gif|bmp)(?:\?\d+?)?(?=")/i, // "
 		},
 
 		// danbooru / nekobooru / sankaku channel (with supplementary script)
@@ -209,10 +219,8 @@
 			function:     'page',
 			link:         /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net|chan\.sankakucomplex\.com)\/post\/show\/\d+(?:\/|$)/i,
 			thumbnail:    /^http:\/\/(?:(?:dan|safe)booru\.donmai\.us|nekobooru\.net|chan\.sankakucomplex\.com)\/data\/(?!preview\/)[\/\w-]+\.(?:jpg|png|gif|bmp)/i,
-			extra:        {
-				xPath:      	'./span[@class="hidden"]',
-				titleXPath: 	'./img[@title]',
-			},
+			xPath:        './span[@class="hidden"]',
+			titleXPath:   './img[@title]',
 		},
 
 		// imagefap
@@ -289,11 +297,9 @@
 			url:          /^http:\/\/mixi.jp\/view_(?:diary|bbs)\.pl/i,
 			function:     'parseHTMLs',
 			link:         /(?:^javascript\:void\(0\);$|MM_openBrWindow\('(.+?)'.*\))/,
+			xPath:        './@onclick',
 			replace:      '$1',
-			extra:        {
-				xPath:      	'./@onclick',
-				image:      	/http:\/\/ic\.mixi\.jp\/p\/\w+\/\w+\/(?:diary|bbs_comm)\/\d+_\d+\.jpg(?=")/i, // "
-			},
+			image:        /http:\/\/ic\.mixi\.jp\/p\/\w+\/\w+\/(?:diary|bbs_comm)\/\d+_\d+\.jpg(?=")/i, // "
 		},
 
 		// normal links to images
@@ -496,6 +502,11 @@
 			'embed.gL_hidden, object.gL_hidden',
 				' { visibility: hidden; } ',
 		].join("");
+/*
+						'#gLightboxImage.r090 {-moz-transform: rotate( 90deg); -moz-transform-origin: 50% 50%;} ',
+						'#gLightboxImage.r180 {-moz-transform: rotate(180deg); -moz-transform-origin: 50% 50%;} ',
+						'#gLightboxImage.r270 {-moz-transform: rotate(270deg); -moz-transform-origin: 50% 50%;} ',
+*/
 		gLightboxCSS.appendChild(document.createTextNode(gLightboxCSSText));
 		objHead.appendChild(gLightboxCSS);
 		
@@ -660,15 +671,13 @@
 		// ---------------
 		
 		// get image urls from this page.
-		// extra.xPath      : String : xPath of search element.
-		// extra.TitleXPath : String : xPath of title.
 		page: function(node, siteinfoToUse) {
 //		if (DEBUG) { GM_log("getImageUrl.page(node, (" + siteinfoToUse['url'] + ", " + siteinfoToUse['link'] + ", " + siteinfoToUse['thumbnail'] + ", " + siteinfoToUse['replace'] + " ))" ) };
 			
 			var xPath, imageNode, imageTitle, imageUrl = {}, thumbnailUrl = {};
 			
-			if (siteinfoToUse['extra'] && siteinfoToUse['extra']['xPath']) {
-				xPath = siteinfoToUse['extra']['xPath'];
+			if (siteinfoToUse['xPath']) {
+				xPath = siteinfoToUse['xPath'];
 			} else if (siteinfoToUse['thumbnail']) {
 				xPath = './/img[@src]';
 			} else {
@@ -680,10 +689,12 @@
 			imageUrl = this._matchUrl(node, (siteinfoToUse['thumbnail'] || siteinfoToUse['link']), siteinfoToUse['replace'], xPath);
 			
 			if (imageUrl) {
-				if (siteinfoToUse['extra'] && siteinfoToUse['extra']['titleXPath']) {
-					imageNode = getFirstElementByXPath(siteinfoToUse['extra']['titleXPath'], node);
+				if (siteinfoToUse['titleXPath']) {
+					imageNode = getFirstElementByXPath(siteinfoToUse['titleXPath'], node);
 					
-					imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+					if (imageNode) {
+						imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+					}
 				}
 				
 				if (siteinfoToUse['thumbnail']) {
@@ -703,17 +714,13 @@
 		},
 		
 		// get image url from linked pages
-		// extra.xPath      : String : xPath of search element.
-		// extra.TitleXPath : String : xPath of title.
-		// extra.image      : RegExp : search url from linked page.
-		// extra.replace    : String : replace extra.image
 		parseHTMLs: function(node, siteinfoToUse) {
-//		if (DEBUG) { GM_log("getImageUrl.parseHTMLs(node, (" + siteinfoToUse['url'] + ", " + siteinfoToUse['link'] + ", "  + siteinfoToUse['thumbnail'] + ", " + siteinfoToUse['replace'] + ", ( " + siteinfoToUse['extra']['image'] + ", " + siteinfoToUse['extra']['replace'] + " )))" ) };
+//		if (DEBUG) { GM_log("getImageUrl.parseHTMLs(node, (" + siteinfoToUse['url'] + ", " + siteinfoToUse['link'] + ", "  + siteinfoToUse['thumbnail'] + ", " + siteinfoToUse['replace'] + ", " + siteinfoToUse['image'] + ", " + siteinfoToUse['imageReplace'] + " ))" ) };
 			
 			var htmlUrl, html, imageNode, imageTitle, imageUrl = {}, thumbnailUrl = {};
 			
-			if (siteinfoToUse['extra'] && siteinfoToUse['extra']['xPath']) {
-				xPath = siteinfoToUse['extra']['xPath'];
+			if (siteinfoToUse['xPath']) {
+				xPath = siteinfoToUse['xPath'];
 			} else {
 				xPath = '.';
 			}
@@ -728,12 +735,14 @@
 					
 					html = this._getFile(htmlUrl['url']);
 					
-					imageUrl['url'] = html.match(siteinfoToUse['extra']['image'])[0].replace(siteinfoToUse['extra']['image'], siteinfoToUse['extra']['replace']);
+					imageUrl['url'] = html.match(siteinfoToUse['image'])[0].replace(siteinfoToUse['image'], siteinfoToUse['imageReplace']);
 					
-					if (siteinfoToUse['extra'] && siteinfoToUse['extra']['titleXPath']) {
-						imageNode = getFirstElementByXPath(siteinfoToUse['extra']['titleXPath'], node);
+					if (siteinfoToUse['titleXPath']) {
+						imageNode = getFirstElementByXPath(siteinfoToUse['titleXPath'], node);
 						
-						imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+						if (imageNode) {
+							imageTitle = (imageNode.title || imageNode.nodeValue || imageNode.textContent);
+						}
 					}
 					
 					if (siteinfoToUse['thumbnail']) {
