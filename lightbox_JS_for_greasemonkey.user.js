@@ -179,7 +179,7 @@
 			thumbnail:    /(\/\d+)_[sm]\.(jpg|png|gif)/i,
 			replace:      '$1.$2',
 			extra:        {
-				titleXPath: 	'./following-sibling::div[@class="pdgTop5"]',
+				titleXPath: 	'./following-sibling::div[@class="pdgTop5"] | //div[@class="f18b"]/text()',
 			},
 		},
 
@@ -493,6 +493,8 @@
 				' { display: block; } ',
 			'#gLightboxPreload',
 				' { display: none; } ',
+			'embed.gL_hidden, object.gL_hidden',
+				' { visibility: hidden; } ',
 		].join("");
 		gLightboxCSS.appendChild(document.createTextNode(gLightboxCSSText));
 		objHead.appendChild(gLightboxCSS);
@@ -634,7 +636,7 @@
 							// insert HTML and set event listener if get first image
 							if (lastElement == 0) {
 								insertHTML();
-								window.addEventListener('keyup', getKey, false);
+								window.addEventListener('keydown', getKey, false);
 								window.addEventListener('resize', resizeLightboxAtEvent, false);
 							}
 							
@@ -804,7 +806,7 @@
 	// Gets keycode. If 'x' is pressed then it hides the lightbox.
 	function getKey(event) {
 		// shortcut keys are vaild only if lightbox is shown.
-		if (lightboxShown()) {
+		if (isDisplay(document.getElementById('gLightboxOverlay'))) {
 			stopEvents(event);
 			
 			switch (event.keyCode) {
@@ -911,7 +913,7 @@
 	function startSlideshow() {
 		slideshow = true;
 		
-		if (lightboxShown()) {
+		if (isDisplay()) {
 			loadAnotherImage(1);
 		} else {
 			showLightbox('',0);
@@ -963,7 +965,7 @@
 		stopEvents(event);
 		
 		// do nothing if lightbox is shown
-		if (!(lightboxShown())) {
+		if (!(isDisplay())) {
 			// prep objects
 			var gLightbox             = document.getElementById('gLightbox');
 			var gLightboxImage        = document.getElementById('gLightboxImage');
@@ -979,20 +981,19 @@
 			// center loadingImage
 			gLightboxLoadingImage.style.top  = sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 20 - gLightboxLoadingImage.naturalHeight) / 2) + 'px';
 			gLightboxLoadingImage.style.left = ((sizeAndPosition['page']['x'] - 20 - gLightboxLoadingImage.naturalWidth) / 2) + 'px';
-			toggleDisplay(gLightboxLoadingImage);
+			changeDisplay(gLightboxLoadingImage, true);
 			
 			// set height of Overlay to take up whole page and show
 			gLightboxOverlay.style.height = sizeAndPosition['page']['y'] + 'px';
-			toggleDisplay(gLightboxOverlay);
+			changeDisplay(gLightboxOverlay, true);
 			
 			// after preloading image, places new image in lightbox then centers.
 			preloaded = function() {
 				// load image
 				gLightboxImage.src = gLightboxPreload.src;
-				if (gLightboxError.className == 'gL_shown') {
-					toggleDisplay(gLightboxError);
-					toggleDisplay(gLightboxImage);
-				}
+				hiddenFlashs(true);
+				changeDisplay(gLightboxError, false);
+				changeDisplay(gLightboxImage,  true);
 				
 				// resize image
 				resizeLightbox(gLightboxPreload.naturalWidth, gLightboxPreload.naturalHeight);
@@ -1003,8 +1004,9 @@
 					gLightboxImage.title = imageLinks[element]['title'];
 					gLightboxImage.style.backgroundColor = imageLinks[element]['backgroundColor'];
 					
-					toggleDisplay(gLightbox);
-					toggleDisplay(gLightboxLoadingImage);
+					changeDisplay(gLightbox,              true);
+					changeDisplay(gLightboxOverlay,       true);
+					changeDisplay(gLightboxLoadingImage, false);
 					
 					// remove event listener
 					gLightboxImage.removeEventListener('load', loaded, false);
@@ -1040,37 +1042,38 @@
 		// cancel opening image
 		stopEvents(event);
 		
-		// do nothing if lightbox is hidden
-		if (lightboxShown()) {
-			// prep objects
-			var gLightbox             = document.getElementById('gLightbox');
-			var gLightboxImage        = document.getElementById('gLightboxImage');
-			var gLightboxError        = document.getElementById('gLightboxError');
-			var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
-			var gLightboxPreload      = document.getElementById('gLightboxPreload');
-			
-			// if event is defined, this function called from event handler. Therefore slideshow should be stopped.
-			if (event) {
-				stopSlideshow();
-			}
-			
-			// remove event listener
-			try {
-				gLightboxImage.removeEventListener('load', loaded, false);
-				gLightboxPreload.removeEventListener('load', preloaded, false);
-				gLightboxPreload.removeEventListener('error', errorMessage, false);
-			} catch(error) {}
-			
-			// remove image
-			gLightboxImage.src = '';
-			
-			// hide lightbox and overlay
-			toggleDisplay(gLightbox);
-			toggleDisplay(gLightboxOverlay);
-			
-			// reset imageLinks.nowViewing
-			imageLinks.nowViewing = -1;
+		// prep objects
+		var gLightbox             = document.getElementById('gLightbox');
+		var gLightboxImage        = document.getElementById('gLightboxImage');
+		var gLightboxError        = document.getElementById('gLightboxError');
+		var gLightboxOverlay      = document.getElementById('gLightboxOverlay');
+		var gLightboxLoadingImage = document.getElementById('gLightboxLoadingImage');
+		var gLightboxPreload      = document.getElementById('gLightboxPreload');
+		
+		// if event is defined, this function called from event handler. Therefore slideshow should be stopped.
+		if (event) {
+			stopSlideshow();
 		}
+		
+		// remove event listener
+		try {
+			gLightboxImage.removeEventListener('load', loaded, false);
+			gLightboxPreload.removeEventListener('load', preloaded, false);
+			gLightboxPreload.removeEventListener('error', errorMessage, false);
+		} catch(error) {}
+		
+		// remove image
+//	gLightboxPreload.src = '';
+		gLightboxImage.src = '';
+		
+		// hide lightbox and overlay
+		changeDisplay(gLightbox,             false);
+		changeDisplay(gLightboxOverlay,      false);
+		changeDisplay(gLightboxLoadingImage, false);
+		hiddenFlashs(false);
+		
+		// reset imageLinks.nowViewing
+		imageLinks.nowViewing = -1;
 	}
 
 	// errorMessage(event)
@@ -1090,10 +1093,10 @@
 		
 		gLightboxImage.src = '';
 		
-		toggleDisplay(gLightbox);
-		toggleDisplay(gLightboxImage);
-		toggleDisplay(gLightboxError);
-		toggleDisplay(gLightboxLoadingImage);
+		changeDisplay(gLightbox,              true);
+		changeDisplay(gLightboxImage,        false);
+		changeDisplay(gLightboxError,         true);
+		changeDisplay(gLightboxLoadingImage, false);
 		
 		// remove event listener
 		try {
@@ -1117,11 +1120,9 @@
 		// get page size and viewport
 		var sizeAndPosition = getSizeAndPosition();
 		
-		// caption is shown?
-		var captionShown = (gLightboxCaption.className == 'gL_shown');
-		
+		// estimate caption height
 		var captionHeight = function(imageWidth, imageHeight) {
-			return (captionShown ? ((imageWidth >= imageHeight) ? 35 : 50) : 0);
+			return (isDisplay(gLightboxCaption) ? ((imageWidth >= imageHeight) ? 35 : 50) : 0);
 		}
 		// calculate display position
 		var calculateDisplayPosition = function(imageWidth, imageHeight) {
@@ -1215,8 +1216,8 @@
 	function resizeLightboxAtEvent(event) {
 		var gLightboxImage = document.getElementById('gLightboxImage');
 		
-		if (lightboxShown()){
-			if (gLightboxImage.className == 'gL_shown') {
+		if (isDisplay()){
+			if (isDisplay(gLightboxImage)) {
 				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight);
 			} else {
 				resizeLightbox(600, 50);
@@ -1228,8 +1229,8 @@
 	function resizeLightboxAtCommand(resizeType) {
 		var gLightboxImage = document.getElementById('gLightboxImage');
 		
-		if (lightboxShown()){
-			if (gLightboxImage.className == 'gL_shown') {
+		if (isDisplay()){
+			if (isDisplay(gLightboxImage)) {
 				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight, resizeType);
 			} else {
 				resizeLightbox(600, 50);
@@ -1242,10 +1243,10 @@
 		var gLightboxImage   = document.getElementById('gLightboxImage');
 		var gLightboxCaption = document.getElementById('gLightboxCaption');
 		
-		toggleDisplay(gLightboxCaption);
+		changeDisplay(gLightboxCaption, !isDisplay(gLightboxCaption));
 		
-		if (lightboxShown()){
-			if (gLightboxImage.className == 'gL_shown') {
+		if (isDisplay()){
+			if (isDisplay(gLightboxImage)) {
 				resizeLightbox(gLightboxImage.naturalWidth, gLightboxImage.naturalHeight);
 			} else {
 				resizeLightbox(600, 50);
@@ -1253,23 +1254,36 @@
 		}
 	}
 
-	// toggleDisplay(node)
-	function toggleDisplay(node) {
-		switch (node.className) {
-			case 'gL_hidden':
-				node.className = 'gL_shown';
-				break;
-			case 'gL_shown':
-				node.className = 'gL_hidden';
-				break;
+	// changeDisplay(node)
+	function changeDisplay(node, shown) {
+		if (shown) {
+			node.className = node.className.replace(/\bgL_hidden\b/,  'gL_shown');
+		} else {
+			node.className = node.className.replace(/\bgL_shown\b/,  'gL_hidden');
 		}
+		
+		if (DEBUG) { GM_log(node.id + " / " + node.className); }
 	}
 
-	// lightbox is shown?
-	function lightboxShown() {
-		var gLightbox = document.getElementById('gLightbox');
+	// isDisplay(node)
+	// node is shown?
+	function isDisplay(node) {
+		var checkNode = node || document.getElementById('gLightbox');
 		
-		return (gLightbox.className == 'gL_shown');
+		return (checkNode.className == 'gL_shown');
+	}
+
+	// hiddenFlashs(hidden)
+	function hiddenFlashs(hidden) {
+		var flashs = getElementsByXPath("//embed[not(@wmode='transparent')] | //object[not(./param[@name='wmode']/@value='transparent')]", document);
+		
+		for (var i = 0; i < flashs.length; i++) {
+			if (hidden) {
+				flashs[i].className += ' gL_hidden';
+			} else {
+				flashs[i].className = flashs[i].className.replace(/\bgL_hidden\b/,  '');
+			}
+		}
 	}
 
 	// ====================
