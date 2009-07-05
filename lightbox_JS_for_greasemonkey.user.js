@@ -333,11 +333,6 @@
 		}
 	}
 
-	// isUrlJavaScript(url)
-	function isUrlJavaScript(url) {
-		return (url == '' || /^(?:#|javascript:)/.test(url));
-	}
-
 	// getElementsByXPath(xPath, node, xml)
 	function getElementsByXPath(xPath, node, xml) {
 		var xPathSnapshot = (xml || document).evaluate(xPath, (node || document), null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -392,15 +387,53 @@
 	// searchBackgroundColor(node)
 	function searchBackgroundColor(node) {
 		var backgroundColor;
-		var checkNode = node;
+		var node = node;
 		
 		do {
-			backgroundColor = getComputedStyle(checkNode, '').backgroundColor;
+			backgroundColor = getComputedStyle(node, '').backgroundColor;
 			
-			checkNode = checkNode.parentNode;
-		} while ((backgroundColor == '' || backgroundColor == 'transparent') && checkNode && (checkNode.nodeName != '#document'))
+			node = node.parentNode;
+		} while ((backgroundColor == '' || backgroundColor == 'transparent') && node && (node.nodeName != '#document'))
 		
 		return backgroundColor;
+	}
+
+	// getGeckoVer()
+	// original code from http://taken.s101.xrea.com/blog/article.php?id=561
+	function getGeckoVer() {
+		var ua = navigator.userAgent;
+		
+		if (ua.indexOf("Gecko/") != -1) {
+			var ver = ua.match(/rv:([\d\.]+?)[ab\)]/)[1];
+			verArray = ver.split('.');
+			ver = verArray.shift() + ".";
+			ver += verArray.join("");
+			return parseFloat(ver);
+		}
+	}
+
+	// manipulate classsName
+	var className = {
+		// className.add(currentClassName, addClassName)
+		// Add className
+		add: function(currentClassName, addClassName) {
+			return (currentClassName + (((currentClassName == '' || currentClassName.charAt(currentClassName.length - 1 ) == ' ')) ? '' : ' ') + addClassName);
+		},
+		// className.remove(currentClassName, removeClassName)
+		// Remove className
+		remove: function(currentClassName, removeClassName) {
+			return currentClassName.replace(new RegExp('\\b' + removeClassName + '\\b'), '');
+		},
+		// className.replace(currentClassName, oldClassName, newClassName)
+		// Replace className
+		replace: function(currentClassName, oldClassName, newClassName) {
+			return currentClassName.replace(new RegExp('\\b' + oldClassName + '\\b'), newClassName);
+		},
+		// className.check(currentClassName, checkClassName)
+		// Check className
+		check: function(currentClassName, checkClassName) {
+			return (new RegExp('\\b' + checkClassName + '\\b')).test(currentClassName);
+		},
 	}
 
 // === main functions ===
@@ -502,13 +535,8 @@
 	// --- Private methods ---
 		// matchUrl(node, re, replace, xpath) : check url and replace
 		var matchUrl = function(node, re, replace, xPath) {
-			var nodes, url, imageUrl = {};
-			
-			if (xPath) {
-				nodes = getElementsByXPath(xPath, node);
-			} else {
-				nodes = [node];
-			}
+			var url, imageUrl = {};
+			var nodes = xPath ? getElementsByXPath(xPath, node) : [node];
 			
 			for (var i = 0; i < nodes.length; i++) {
 				url = (nodes[i].href || nodes[i].src || nodes[i].nodeValue || nodes[i].textContent);
@@ -527,7 +555,7 @@
 					return imageUrl;
 				}
 			}
-		}
+		};
 		// getFile(url)
 		var getFile = function(url) {
 			var req = new XMLHttpRequest();
@@ -540,8 +568,8 @@
 					return req.responseText;
 				}
 			} catch (error) {}
-		}
-
+		};
+	
 	// --- Public methods ---
 		return {
 			// get image urls from this page.
@@ -630,20 +658,53 @@
 		}
 }
 
-	// openImageGetUrl(element)
-	function openImageGetUrl(element) {
-		var link = lightbox.imageLinks[element]['link'];
+	// openImageGetUrl(suffix)
+	function openImageGetUrl(suffix) {
+		var link = lightbox.imageLinks[suffix]['link'];
 		
 		if (isUrlJavaScript(link)) {
-			link = lightbox.imageLinks[element]['imageUrl'];
+			link = lightbox.imageLinks[suffix]['imageUrl'];
 		}
 		
 		return link;
 	}
 
+	// isUrlJavaScript(url)
+	function isUrlJavaScript(url) {
+		return /^(?:#|javascript:|$)/.test(url);
+	}
+
 	var lightbox = function() {
 	// --- Private propaties ---
 		var elements = {};
+	
+	// --- Private methods ---
+		// hiddenFlashs(hidden)
+		var hiddenFlashs = function(hidden) {
+			var flashs = getElementsByXPath("//embed[not(@wmode='transparent')] | //object[not(./param[@name='wmode']/@value='transparent')]", document);
+			
+			for (var i = 0; i < flashs.length; i++) {
+				if (hidden) {
+					flashs[i].className == className.add(flashs[i].className, 'gL_hidden');
+				} else {
+					flashs[i].className == className.remove(flashs[i].className, 'gL_hidden');
+				}
+			}
+		};
+		// changeDisplay(node,shown)
+		var changeDisplay = function(node, shown) {
+			if (shown) {
+				node.className = className.replace(node.className, 'gL_hidden', 'gL_shown');
+			} else {
+				node.className = className.replace(node.className, 'gL_shown', 'gL_hidden');
+			}
+			
+//		if (DEBUG) { GM_log(node.id + " / " + node.className); }
+		};
+		// isDisplay(node)
+		var isDisplay = function(node) {
+			return className.check(node.className, 'gL_shown');
+		};
 	
 		return {
 	// --- Public propaties ---
@@ -657,6 +718,9 @@
 			
 			// type of resizing
 			resizeType: 'normal',
+			
+			// rotating angle
+			angle: 0,
 			
 			// slideshow flag and timeout ID
 			slideshow: false,
@@ -692,6 +756,12 @@
 						' { display: none; } ',
 					'#gLightbox.gL_shown',
 						' { display: block; } ',
+					'#gLightbox.gL_r90',
+						' { -moz-transform: rotate( 90deg); -moz-transform-origin: 50% 50%; } ',
+					'#gLightbox.gL_r180',
+						' { -moz-transform: rotate(180deg); -moz-transform-origin: 50% 50%; } ',
+					'#gLightbox.gL_r270',
+						' { -moz-transform: rotate(270deg); -moz-transform-origin: 50% 50%; } ',
 					'#gLightbox a, #gLightbox img, ',
 					'#gLightbox a:hover,  #gLightbox img:hover, ',
 					'#gLightbox a:focus,  #gLightbox img:focus, ',
@@ -704,14 +774,6 @@
 						' { display: none; } ',
 					'#gLightboxImage.gL_shown',
 						' { display: inline; } ',
-/*
-					'#gLightboxImage.r090',
-						' { -moz-transform: rotate( 90deg); -moz-transform-origin: 50% 50%; } ',
-					'#gLightboxImage.r180',
-						' { -moz-transform: rotate(180deg); -moz-transform-origin: 50% 50%; } ',
-					'#gLightboxImage.r270',
-						' { -moz-transform: rotate(270deg); -moz-transform-origin: 50% 50%; } ',
-*/
 					'#gLightboxError',
 						' { width: 600px; height: 50px; color: #FFF; text-align: center; font-size: 3em; padding: 0; margin: 0; } ',
 					'#gLightboxError.gL_hidden',
@@ -818,7 +880,7 @@
 						break;
 					case 'keydown':
 						// shortcut keys are vaild only if lightbox is shown.
-						if (isDisplay(document.getElementById('gLightboxOverlay'))) {
+						if (isDisplay(elements.overlay)) {
 							// Gets keycode.
 //						if (DEBUG) { GM_log("keyCode is " + event.keyCode + " ( " + event.shiftKey + " / " + event.ctrlKey + " ) "); }
 							switch (event.keyCode) {
@@ -880,8 +942,10 @@
 									}
 									break;
 								case 48: // '0'
+								case 96: // num '0'
 									if (!event.shiftKey && !event.ctrlKey) {
 										stopEvents(event);
+										lightbox.rotate(-lightbox.angle);
 										lightbox.resize('normal');
 									}
 									break;
@@ -895,6 +959,18 @@
 									if (!event.shiftKey && !event.ctrlKey) {
 										stopEvents(event);
 										lightbox.resize('height');
+									}
+									break;
+								case 76: // 'l'
+									if (!event.shiftKey && !event.ctrlKey) {
+										stopEvents(event);
+										lightbox.rotate(90);
+									}
+									break;
+								case 82: // 'r'
+									if (!event.shiftKey && !event.ctrlKey) {
+										stopEvents(event);
+										lightbox.rotate(-90);
 									}
 									break;
 							}
@@ -918,7 +994,7 @@
 				stopEvents(event);
 				
 				// do nothing if lightbox is shown
-				if (!(isDisplay())) {
+				if (!(isDisplay(elements.div))) {
 					// prep objects
 					// get page size and viewport
 					var sizeAndPosition = getSizeAndPosition();
@@ -1043,7 +1119,7 @@
 				
 				lightbox.slideshow = true;
 				
-				if (isDisplay()) {
+				if (isDisplay(elements.div)) {
 					lightbox.hide('');
 					lightbox.show('', lightbox.nowViewing + 1);
 				} else {
@@ -1059,13 +1135,37 @@
 					lightbox.slideshow = false;
 				}
 			},
+			rotate: function(angle) {
+				// CSS Transforms are supported after Firefox 3.5 (Gecko 1.9.1)
+				if (getGeckoVer() >= 1.91) {
+					lightbox.angle = (lightbox.angle + angle + 360) % 360;
+					
+					if (lightbox.angle == 0) {
+						elements.div.className = className.remove(elements.div.className, 'gL_r\\d+');
+					} else {
+						elements.div.className = className.add(className.remove(elements.div.className, 'gL_r\\d+'), 'gL_r' + lightbox.angle);
+					}
+					if (DEBUG) { GM_log('lightbox.rotate : ' + lightbox.angle + " / " + elements.div.className); }
+					
+					lightbox.resize('');
+				}
+			},
 			resize: function(resizeType, imageWidth, imageHeight) {
 //			if (DEBUG) { GM_log('lightbox.resize'); }
 				
+				// check modes
+				var isDisplayImage = isDisplay(elements.image);
+				var isRotate = (lightbox.angle % 180 == 90);
+				
 				// check arguments
 				var resizeType  = resizeType  || lightbox.resizeType;
-				var imageWidth  = imageWidth  || (isDisplay(elements.image) ? elements.image.naturalWidth  : 600);
-				var imageHeight = imageHeight || (isDisplay(elements.image) ? elements.image.naturalHeight :  50);
+				var imageWidth  = imageWidth  || (isDisplayImage ? elements.image.naturalWidth  : 600);
+				var imageHeight = imageHeight || (isDisplayImage ? elements.image.naturalHeight :  50);
+				
+				// if image rotated, swap height for width
+				if (isDisplayImage && isRotate) {
+					[imageWidth, imageHeight] = [imageHeight, imageWidth];
+				}
 				
 				// preserve resizetype
 				lightbox.resizeType = resizeType;
@@ -1091,7 +1191,7 @@
 				
 				// center lightbox and make sure that the top and left values are not negative
 				// and the image placed outside the viewport
-				displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
+				var displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
 				
 				// resize routines
 				var resize = {
@@ -1101,13 +1201,15 @@
 							// height is too big
 							displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
 							displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
-							
-							displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
 						} else {
 							// width is too big
 							displaySize['x'] = sizeAndPosition['page']['x'] - 20;
 							displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
-							
+						}
+						
+						if (isRotate) {
+							displayPosition = calculateDisplayPosition(displaySize['y'], displaySize['x']);
+						} else {
 							displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
 						}
 					},
@@ -1150,14 +1252,14 @@
 					resize[resizeType]();
 				}
 				
-				if (DEBUG) { GM_log("loading: " + elements.preload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
+				if (DEBUG) { GM_log("lightbox.resize : " + elements.preload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
 				
 				// set css
 				elements.div.style.left = displayPosition['x'] + 'px';
 				elements.div.style.top  = displayPosition['y'] + 'px';
-				elements.image.style.width  = displaySize['x'] + 'px';
-				elements.image.style.height = displaySize['y'] + 'px';
-				elements.caption.style.width = displaySize['x'] + 'px';
+				elements.image.style.width  = (isRotate ? displaySize['y'] : displaySize['x']) + 'px';
+				elements.image.style.height = (isRotate ? displaySize['x'] : displaySize['y']) + 'px';
+				elements.caption.style.width = (isRotate ? displaySize['y'] : displaySize['x']) + 'px';
 				
 				// After image is loaded, update the overlay height as the new image might have
 				// increased the overall page height.
@@ -1173,42 +1275,7 @@
 		};
 	}();
 
-	// changeDisplay(node)
-	function changeDisplay(node, shown) {
-		if (shown) {
-			node.className = node.className.replace(/\bgL_hidden\b/,  'gL_shown');
-		} else {
-			node.className = node.className.replace(/\bgL_shown\b/,  'gL_hidden');
-		}
-		
-		if (DEBUG) { GM_log(node.id + " / " + node.className); }
-	}
-
-	// isDisplay(node)
-	// node is shown?
-	function isDisplay(node) {
-		var checkNode = node || document.getElementById('gLightbox');
-		
-		return (checkNode.className == 'gL_shown');
-	}
-
-	// hiddenFlashs(hidden)
-	function hiddenFlashs(hidden) {
-		var flashs = getElementsByXPath("//embed[not(@wmode='transparent')] | //object[not(./param[@name='wmode']/@value='transparent')]", document);
-		
-		for (var i = 0; i < flashs.length; i++) {
-			if (hidden) {
-				flashs[i].className += ' gL_hidden';
-			} else {
-				flashs[i].className = flashs[i].className.replace(/\bgL_hidden\b/,  '');
-			}
-		}
-	}
-	
-	// ====================
-	// Main routine
-	// ====================
-
+	// === Main routine ===
 	checkSITEINFO();
 	checkNodes();
 	
