@@ -727,8 +727,6 @@
 		
 	// --- Public methods ---
 			init: function() {
-//			if (DEBUG) { GM_log('lightbox.init'); }
-				
 				// Function runs on HTML load, inserting html at the top of the page that looks like this:
 				//	<img id="gLightboxPreload" />
 				//	<div id="gLightboxOverlay">
@@ -869,8 +867,6 @@
 			},
 			// event handler
 			handleEvent: function(event) {
-//			if (DEBUG) { GM_log('lightbox.handleEvent'); }
-				
 				switch (event.type) {
 					case 'click':
 						lightbox.hide(event);
@@ -961,6 +957,12 @@
 										lightbox.resize('height');
 									}
 									break;
+								case 70: // 'f'
+									if (!event.shiftKey && !event.ctrlKey) {
+										stopEvents(event);
+										lightbox.resize('fullsize');
+									}
+									break;
 								case 76: // 'l'
 									if (!event.shiftKey && !event.ctrlKey) {
 										stopEvents(event);
@@ -979,8 +981,6 @@
 			},
 			// show lightbox
 			show: function(event, suffix) {
-//			if (DEBUG) { GM_log('lightbox.show'); }
-				
 				// shift + click, ctrl + click => don't use lightbox.
 				// shift + ctrl + click => don't use lightbox and open the link in this window.
 				if (event.shiftKey || event.ctrlKey) {
@@ -1086,8 +1086,6 @@
 			},
 			// hide lightbox
 			hide: function(event) {
-//			if (DEBUG) { GM_log('lightbox.hide'); }
-				
 				// cancel opening image
 				stopEvents(event);
 				
@@ -1115,8 +1113,6 @@
 			},
 			// start slideshow
 			startSlideshow: function() {
-//			if (DEBUG) { GM_log('lightbox.startSlideshow'); }
-				
 				lightbox.slideshow = true;
 				
 				if (isDisplay(elements.div)) {
@@ -1128,8 +1124,6 @@
 			},
 			// stop slideshow
 			stopSlideshow: function() {
-//			if (DEBUG) { GM_log('lightbox.stopSlideshow'); }
-				
 				if (lightbox.slideshow) {
 					clearTimeout(lightbox.slideshow);
 					lightbox.slideshow = false;
@@ -1151,8 +1145,6 @@
 				}
 			},
 			resize: function(resizeType, imageWidth, imageHeight) {
-//			if (DEBUG) { GM_log('lightbox.resize'); }
-				
 				// check modes
 				var isDisplayImage = isDisplay(elements.image);
 				var isRotate = (lightbox.angle % 180 == 90);
@@ -1162,104 +1154,88 @@
 				var imageWidth  = imageWidth  || (isDisplayImage ? elements.image.naturalWidth  : 600);
 				var imageHeight = imageHeight || (isDisplayImage ? elements.image.naturalHeight :  50);
 				
-				// if image rotated, swap height for width
-				if (isDisplayImage && isRotate) {
-					[imageWidth, imageHeight] = [imageHeight, imageWidth];
-				}
-				
 				// preserve resizetype
 				lightbox.resizeType = resizeType;
 				
+				// set transform matrix
+				var tr;
+				if (isDisplayImage && isRotate) {
+					tr = { x: 'y', y: 'x' };
+				} else {
+					tr = { x: 'x', y: 'y' };
+				}
+				
 				// get page size and viewport
 				var sizeAndPosition = getSizeAndPosition();
+				
+				GM_log('window : ' + sizeAndPosition['window']['y'] + ' x ' + sizeAndPosition['window']['x'] + ' / page : ' + sizeAndPosition['page']['y'] + ' x ' + sizeAndPosition['page']['x'] + ' / position : ' + sizeAndPosition['position']['y'] + ' , ' + sizeAndPosition['position']['x']);
 				
 				// get image size and copy values of a object
 				var imageSize =   { x: imageWidth, y: imageHeight };
 				var displaySize = { x: imageWidth, y: imageHeight };
 				
-				// estimate caption height
-				var captionHeight = function(imageWidth, imageHeight) {
-					return (isDisplay(elements.caption) ? ((imageWidth >= imageHeight) ? 35 : 50) : 0);
+				// estimate effective viewport and effective .
+				var eWindowSize = {
+					x: sizeAndPosition['window']['x'] - 20,
+					y: sizeAndPosition['window']['y'] - 20 - (isDisplay(elements.caption) ? ((imageWidth >= imageHeight) ? 35 : 50) : 0),
 				}
-				// calculate display position
-				var calculateDisplayPosition = function(imageWidth, imageHeight) {
-					return {
-						x: ((sizeAndPosition['page']['x'] - 20 - imageWidth) / 2),
-						y: sizeAndPosition['position']['y'] + ((sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight) - imageHeight) / 2),
-					}
-				};
-				
-				// center lightbox and make sure that the top and left values are not negative
-				// and the image placed outside the viewport
-				var displayPosition = calculateDisplayPosition(imageSize['x'], imageSize['y']);
 				
 				// resize routines
 				var resize = {
-					normal : function() {
-						// which too bigs?
-						if ((imageSize['y'] / sizeAndPosition['window']['y']) > (imageSize['x'] / sizeAndPosition['window']['x'])) {
-							// height is too big
-							displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
-							displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
-						} else {
-							// width is too big
-							displaySize['x'] = sizeAndPosition['page']['x'] - 20;
+					normal: function() {
+						// too bigs?
+						if ((displaySize['y'] > eWindowSize[tr['y']]) || (displaySize['x'] > eWindowSize[tr['x']])) {
+							if ((displaySize['y'] / eWindowSize[tr['y']]) > (displaySize['x'] / eWindowSize[tr['x']])) {
+								// height is too big
+								displaySize['y'] = eWindowSize[tr['y']];
+								displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
+							} else {
+								// width is too big
+								displaySize['x'] = eWindowSize[tr['x']];
+								displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
+							}
+						}
+					},
+					width: function() {
+						if (displaySize['x'] > eWindowSize[tr['x']]) {
+							displaySize['x'] = eWindowSize[tr['x']];
 							displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
 						}
-						
-						if (isRotate) {
-							displayPosition = calculateDisplayPosition(displaySize['y'], displaySize['x']);
-						} else {
-							displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
-						}
 					},
-					width  : function() {
-						displaySize['x'] = sizeAndPosition['page']['x'] - 20;
-						
-						if (displaySize['x'] >= imageSize['x']) {
-							displaySize['x'] = imageSize['x'];
-							displaySize['y'] = imageSize['y'];
-						} else {
-							displaySize['y'] = imageSize['y'] * (displaySize['x'] / imageSize['x']);
-						}
-						
-						displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
-						
-						if (sizeAndPosition['position']['y'] > displayPosition['y']) {
-							displayPosition['y'] = sizeAndPosition['position']['y'];
-						}
-					},
-					height : function() {
-						displaySize['y'] = sizeAndPosition['window']['y'] - 20 - captionHeight(imageWidth, imageHeight);
-						
-						if (displaySize['y'] >= imageSize['y']) {
-							displaySize['y'] = imageSize['y'];
-							displaySize['x'] = imageSize['x'];
-						} else {
+					height: function() {
+						if (displaySize['y'] > eWindowSize[tr['y']]) {
+							displaySize['y'] = eWindowSize[tr['y']];
 							displaySize['x'] = imageSize['x'] * (displaySize['y'] / imageSize['y']);
 						}
-						
-						displayPosition = calculateDisplayPosition(displaySize['x'], displaySize['y']);
-						
-						if (sizeAndPosition['position']['x'] > displayPosition['x']) {
-							displayPosition['x'] = sizeAndPosition['position']['x'];
-						}
 					},
+					fullsize: function() {},
 				}
 				
-				// resize if image is larger than screen size
-				if ((displayPosition['y'] < sizeAndPosition['position']['y']) || (displayPosition['x'] < sizeAndPosition['position']['x'])) {
-					resize[resizeType]();
+				// run resize routine
+				resize[resizeType]();
+				
+				// calculate display position
+				displayPosition = {
+					x: sizeAndPosition['position']['x'] + ((eWindowSize['x'] - displaySize['x']) / 2),
+					y: sizeAndPosition['position']['y'] + ((eWindowSize['y'] - displaySize['y']) / 2),
+				};
+				
+				// adjust display position
+				if (displayPosition['x'] - ((displaySize[tr['x']] - displaySize['x']) / 2) < sizeAndPosition['position']['x']) {
+					displayPosition['x'] = sizeAndPosition['position']['x'] + ((displaySize[tr['x']] - displaySize['x']) / 2);
+				}
+				if (displayPosition['y'] - ((displaySize[tr['y']] - displaySize['y']) / 2) < sizeAndPosition['position']['y']) {
+					displayPosition['y'] = sizeAndPosition['position']['y'] + ((displaySize[tr['y']] - displaySize['y']) / 2);
 				}
 				
-				if (DEBUG) { GM_log("lightbox.resize : " + elements.preload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize['y'] + "x" + displaySize['x'] + ")") };
+				if (DEBUG) { GM_log('lightbox.resize : ' + elements.preload.src + " (" + imageSize['y'] + "x" + imageSize['x'] + ", " + displaySize[tr['y']] + "x" + displaySize[tr['x']] + " / " + displayPosition['y'] + " , " + displayPosition['x'] + ")") };
 				
 				// set css
 				elements.div.style.left = displayPosition['x'] + 'px';
 				elements.div.style.top  = displayPosition['y'] + 'px';
-				elements.image.style.width  = (isRotate ? displaySize['y'] : displaySize['x']) + 'px';
-				elements.image.style.height = (isRotate ? displaySize['x'] : displaySize['y']) + 'px';
-				elements.caption.style.width = (isRotate ? displaySize['y'] : displaySize['x']) + 'px';
+				elements.image.style.width  = displaySize['x'] + 'px';
+				elements.image.style.height = displaySize['y'] + 'px';
+				elements.caption.style.width = displaySize['x'] + 'px';
 				
 				// After image is loaded, update the overlay height as the new image might have
 				// increased the overall page height.
@@ -1267,8 +1243,6 @@
 				elements.overlay.style.height = sizeAndPosition['page']['y'] + 'px';
 			},
 			toggleCaption: function() {
-//			if (DEBUG) { GM_log('lightbox.toggleCaption'); }
-				
 				changeDisplay(elements.caption, !isDisplay(elements.caption));
 				lightbox.resize('');
 			},
