@@ -441,93 +441,84 @@
 	function checkSITEINFO() {
 //	if (DEBUG) { GM_log("checkSITEINFO : " + location.href ); }
 		
+		// return value
+		var value = false;
+		
 		for (var i = 0; i < SITEINFO.length; i++) {
 			if (location.href.match(SITEINFO[i]['url'])) {
 				if (DEBUG) { GM_log("checkSITEINFO : using " + SITEINFO[i]['url']); }
 				
 				siteinfoToUse.push(SITEINFO[i]);
+				value = true;
 			}
 		}
-	}
-
-	// checkNodes(nodes)
-	function checkNodes(nodes) {
-		var nodes = (nodes || document);
 		
-		if (nodes.length) {
-			nodes.forEach(addImage);
-		} else {
-			addImage(nodes);
-		}
+		return value;
 	}
 
-	// addFilterHandler() 
-	function addFilterHandler() {
-		if (window.AutoPagerize.addFilter) {
-			window.AutoPagerize.addFilter(checkNodes);
-		}
-	}
-
-	// addImage(node)
+	// addImage(nodes)
 	// Going through link tags looking for links to images.
 	// These links receive onclick events that enable the lightbox display for their targets.
-	function addImage(node) {
+	function addImage(nodes) {
 		if (DEBUG) { var startTime = new Date; }
 		
 		var links, startElement, lastElement, addImageUrl = {};
+		var nodes = nodes || [document];
 		
-		links = getElementsByXPath(".//a[@href]", node);
-		startElement = (lightbox.imageLinks.length || 0);
-		
-		// declare eventListener
-		var addEvent = function(node, element, siteinfo) {
-			node.addEventListener('click', function(event) { lightbox.show(event, element); }, true);
-			if (DEBUG) { GM_log( i + "-> lightbox.imageLinks[" + element + "] (" + siteinfo['link'] + ")\n" + lightbox.imageLinks[element]['link'] + "\n" + lightbox.imageLinks[element]['imageUrl'] + "\n" + lightbox.imageLinks[element]['title'] + "\n" + lightbox.imageLinks[element]['backgroundColor'] ); }
-		}
-		
-		for (var i = 0; i < links.length; i++) {
-			for (var j = 0; j < siteinfoToUse.length; j++) {
-				if (siteinfoToUse[j]['link'].test(links[i].href)) {
-					if (siteinfoToUse[j]['excludeLink'] && siteinfoToUse[j]['excludeLink'].test(links[i].href)) {
-						break;
-					}
-					
-					lastElement = lightbox.imageLinks.length;
-					
-					// detect image url and title
-					if (!(siteinfoToUse[j]['function'])) {
-						addImageUrl = siteinfoToUse[j]['getImageUrl'](links[i]);
-					} else {
-						addImageUrl = getImageUrl[siteinfoToUse[j]['function']](links[i], siteinfoToUse[j]);
-					}
-					
-					if (addImageUrl && addImageUrl['url']) {
-						// if duplicate images, reuse before event
-						if (lastElement > 0 && (links[i].href == lightbox.imageLinks[lastElement - 1]['link']) && !(isUrlJavaScript(links[i].href))) {
-							addEvent(links[i], lastElement - 1, siteinfoToUse[j]);
-						} else {
-							lightbox.imageLinks[lastElement] = {
-								link:            links[i].href,
-								imageUrl:        addImageUrl['url'],
-								title:           addImageUrl['title'],
-								backgroundColor: searchBackgroundColor(links[i]),
-							};
-							
-							// insert HTML and set event listener if get first image
-							if (lastElement == 0) {
-								lightbox.init();
-							}
-							
-							// set eventListener
-							addEvent(links[i], lastElement, siteinfoToUse[j]);
+		for (var k = 0; k < nodes.length; k++) {
+			links = getElementsByXPath(".//a[@href]", nodes[k]);
+			startElement = (lightbox.imageLinks.length || 0);
+			
+			// declare eventListener
+			var addEvent = function(node, element, siteinfo) {
+				node.addEventListener('click', function(event) { lightbox.show(event, element); }, true);
+				if (DEBUG) { GM_log( i + "-> lightbox.imageLinks[" + element + "] (" + siteinfo['link'] + ")\n" + lightbox.imageLinks[element]['link'] + "\n" + lightbox.imageLinks[element]['imageUrl'] + "\n" + lightbox.imageLinks[element]['title'] + "\n" + lightbox.imageLinks[element]['backgroundColor'] ); }
+			}
+			
+			for (var i = 0; i < links.length; i++) {
+				for (var j = 0; j < siteinfoToUse.length; j++) {
+					if (siteinfoToUse[j]['link'].test(links[i].href)) {
+						if (siteinfoToUse[j]['excludeLink'] && siteinfoToUse[j]['excludeLink'].test(links[i].href)) {
+							break;
 						}
 						
-						break;
+						lastElement = lightbox.imageLinks.length;
+						
+						// detect image url and title
+						if (!(siteinfoToUse[j]['function'])) {
+							addImageUrl = siteinfoToUse[j]['getImageUrl'](links[i]);
+						} else {
+							addImageUrl = getImageUrl[siteinfoToUse[j]['function']](links[i], siteinfoToUse[j]);
+						}
+						
+						if (addImageUrl && addImageUrl['url']) {
+							// if duplicate images, reuse before event
+							if (lastElement > 0 && (links[i].href == lightbox.imageLinks[lastElement - 1]['link']) && !(isUrlJavaScript(links[i].href))) {
+								addEvent(links[i], lastElement - 1, siteinfoToUse[j]);
+							} else {
+								lightbox.imageLinks[lastElement] = {
+									link:            links[i].href,
+									imageUrl:        addImageUrl['url'],
+									title:           addImageUrl['title'],
+									backgroundColor: searchBackgroundColor(links[i]),
+								};
+								
+								// insert HTML and set event listener if get first image
+								if (lastElement == 0) {
+									lightbox.init();
+								}
+								
+								// set eventListener
+								addEvent(links[i], lastElement, siteinfoToUse[j]);
+							}
+							
+							break;
+						}
 					}
 				}
 			}
 		}
-		
+			
 		if (DEBUG) { GM_log( "addImage: " + (new Date - startTime) + " ms"); }
 	}
 
@@ -1250,14 +1241,16 @@
 	}();
 
 	// === Main routine ===
-	checkSITEINFO();
-	checkNodes();
-	
-	// for AutoPagerize
-	if (window.AutoPagerize) {
-		addFilterHandler();
-	} else {
-		window.addEventListener('GM_AutoPagerizeLoaded', addFilterHandler, false);
+	// run only if an URL matched
+	if (checkSITEINFO()) {
+		addImage();
+		
+		// for AutoPagerize
+		if (window.AutoPagerize.addFilter) {
+			window.AutoPagerize.addFilter(addImage);
+		} else {
+			window.addEventListener('GM_AutoPagerizeLoaded', addImage, false);
+		}
 	}
 
 })()
